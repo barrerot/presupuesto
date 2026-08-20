@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dashboard</title>
+<style>
+  :root {
+    --tinta: #16191d; --papel: #f7f6f3; --linea: #dcd8d0; --apagado: #6f6a62;
+    --acento: #1d5c4f; --acento-sua: #e4efeb; --alerta: #9c3a24; --alerta-sua: #f8e8e4;
+    --morado: #6a4b9c; --morado-sua: #ece6f5; --radio: 4px;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--papel); color: var(--tinta);
+         font: 15px/1.5 ui-sans-serif, system-ui, "Segoe UI", sans-serif; }
+  .cifra { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+           font-variant-numeric: tabular-nums; }
+  header { border-bottom: 1px solid var(--linea); background: #fff;
+           position: sticky; top: 0; z-index: 20; }
+  .cabecera { max-width: 1300px; margin: 0 auto; padding: 13px 20px;
+              display: flex; align-items: baseline; gap: 20px; flex-wrap: wrap; }
+  h1 { font-size: 17px; margin: 0; font-weight: 600; }
+  nav a { color: var(--apagado); text-decoration: none; font-size: 14px;
+          padding: 3px 8px; border-radius: var(--radio); }
+  nav a:hover { background: var(--papel); color: var(--tinta); }
+  nav a.aqui { color: var(--acento); font-weight: 600; }
+  select { font: inherit; padding: 5px 9px; border: 1px solid var(--linea);
+            border-radius: var(--radio); background: #fff; margin-left: auto; }
+
+  main { max-width: 1300px; margin: 0 auto; padding: 18px 20px 60px; }
+
+  .aviso { padding: 10px 14px; margin-bottom: 16px; border-radius: var(--radio);
+           background: var(--alerta-sua); border: 1px solid var(--alerta);
+           color: var(--alerta); font-size: 14px; display: flex; align-items: center; gap: 10px; }
+  .aviso a { color: inherit; font-weight: 600; }
+
+  .rejilla { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
+  @media (max-width: 900px) { .rejilla { grid-template-columns: repeat(2, 1fr); } }
+
+  .tarjeta { background: #fff; border: 1px solid var(--linea); border-radius: var(--radio);
+             padding: 14px 16px; }
+  .tarjeta .etq { font-size: 11px; text-transform: uppercase; letter-spacing: .06em;
+                  color: var(--apagado); margin-bottom: 4px; }
+  .tarjeta .val { font-size: 26px; font-weight: 600; line-height: 1.1; }
+  .tarjeta .sub { font-size: 12px; color: var(--apagado); margin-top: 4px; }
+  .tarjeta .sub.pos { color: var(--acento); }
+  .tarjeta .sub.neg { color: var(--alerta); }
+
+  .paneles { display: grid; grid-template-columns: 1.6fr 1fr; gap: 12px; margin-bottom: 12px; }
+  @media (max-width: 900px) { .paneles { grid-template-columns: 1fr; } }
+  .panel { background: #fff; border: 1px solid var(--linea); border-radius: var(--radio);
+           padding: 16px; }
+  .panel h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .06em;
+              color: var(--apagado); margin: 0 0 14px; font-weight: 600; }
+
+  /* Barras de ingreso/gasto por mes, dibujadas a mano con divs: nada de
+     librerías de gráficos para cuatro barras. */
+  .barras { display: flex; align-items: flex-end; gap: 6px; height: 180px; }
+  .mesCol { flex: 1; display: flex; flex-direction: column; align-items: center;
+            justify-content: flex-end; height: 100%; gap: 2px; }
+  .mesBarras { display: flex; align-items: flex-end; gap: 2px; height: 100%; width: 100%; justify-content: center; }
+  .barra { width: 40%; border-radius: 2px 2px 0 0; min-height: 2px; position: relative; }
+  .barra.ingreso { background: var(--acento); }
+  .barra.gasto { background: var(--alerta); opacity: .85; }
+  .mesEtq { font-size: 10px; color: var(--apagado); margin-top: 4px; text-transform: uppercase; }
+  .barra:hover::after {
+    content: attr(data-v); position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%);
+    background: var(--tinta); color: #fff; padding: 2px 6px; border-radius: 3px; font-size: 11px;
+    white-space: nowrap; margin-bottom: 4px; font-family: ui-monospace, monospace;
+  }
+  .leyBarras { display: flex; gap: 16px; font-size: 12px; color: var(--apagado); margin-top: 10px; }
+  .leyBarras span { display: inline-flex; align-items: center; gap: 5px; }
+  .puntoLeg { width: 9px; height: 9px; border-radius: 2px; display: inline-block; }
+
+  /* Ranking de categorías: barras horizontales, la más cara arriba. */
+  .ranking { display: flex; flex-direction: column; gap: 7px; }
+  .rankFila { display: grid; grid-template-columns: 130px 1fr 70px; align-items: center; gap: 8px; font-size: 13px; }
+  .rankNom { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .rankBarraFondo { background: #f1eee9; border-radius: 2px; height: 14px; overflow: hidden; }
+  .rankBarra { height: 100%; background: var(--alerta); opacity: .8; border-radius: 2px; }
+  .rankVal { text-align: right; }
+
+  /* Reparto 50/30/20: una barra apilada horizontal. */
+  .repartoBarra { display: flex; height: 34px; border-radius: 4px; overflow: hidden;
+                  border: 1px solid var(--linea); margin-bottom: 10px; }
+  .repartoBarra > div { display: flex; align-items: center; justify-content: center;
+                        color: #fff; font-size: 12px; font-weight: 600; overflow: hidden; }
+  .rep-fijo { background: var(--tinta); }
+  .rep-variable { background: var(--alerta); }
+  .rep-ahorro { background: var(--acento); }
+  .repartoLeyenda { display: flex; flex-wrap: wrap; gap: 14px; font-size: 12.5px; }
+  .repartoLeyenda .fila { display: flex; align-items: center; gap: 6px; }
+  .repartoLeyenda .obj { color: var(--apagado); }
+
+  .cargando { padding: 60px; text-align: center; color: var(--apagado); }
+</style>
+</head>
+<body>
+<header>
+  <div class="cabecera">
+    <h1>Presupuesto</h1>
+    <nav>
+      <a href="/dashboard.html" class="aqui">Dashboard</a>
+      <a href="/">Bandeja</a>
+      <a href="/anual.html">Presupuesto vs real</a>
+      <a href="/reglas.html">Reglas</a>
+    </nav>
+    <select id="anio"></select>
+  </div>
+</header>
+<main>
+  <div id="avisoPend"></div>
+  <div id="contenido"><div class="cargando">Cargando…</div></div>
+</main>
+
+<script>
+const $ = (s) => document.querySelector(s);
+const escapar = (s) => String(s).replace(/[&<>"]/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const eur = (n) => Number(n).toLocaleString('es-ES', { style:'currency', currency:'EUR', maximumFractionDigits: 0 });
+const eur2 = (n) => Number(n).toLocaleString('es-ES', { style:'currency', currency:'EUR', maximumFractionDigits: 2 });
+const pct = (n) => Number(n).toLocaleString('es-ES', { style:'percent', maximumFractionDigits: 1 });
+const MESES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+
+async function api(url) {
+  const r = await fetch(url);
+  const t = await r.text();
+  let c = null; try { c = JSON.parse(t); } catch {}
+  if (!r.ok) throw new Error((c && c.error) || `Error ${r.status}`);
+  return c;
+}
+
+function tarjetas(d) {
+  const ing = d.porMes.reduce((s, m) => s + m.ingresos, 0);
+  const gas = d.porMes.reduce((s, m) => s + m.gastos, 0);
+  const ahorro = d.porMes.reduce((s, m) => s + m.ahorro, 0);
+  const neto = ing + gas + ahorro; // gastos y ahorro ya son negativos
+  const tasaAhorro = ing > 0 ? neto / ing : 0;
+
+  const ant = d.comparativa.find((c) => c.anio === d.anio - 1);
+  const actual = d.comparativa.find((c) => c.anio === d.anio);
+  let subGasto = '';
+  if (ant && actual && ant.gastos) {
+    const diff = (actual.gastos - ant.gastos) / Math.abs(ant.gastos);
+    subGasto = `<div class="sub ${diff > 0 ? 'neg' : 'pos'}">${diff > 0 ? '+' : ''}${pct(diff)} vs ${d.anio - 1}</div>`;
+  }
+
+  return `<div class="rejilla">
+    <div class="tarjeta"><div class="etq">Ingresos</div><div class="val cifra">${eur(ing)}</div></div>
+    <div class="tarjeta"><div class="etq">Gastos</div><div class="val cifra">${eur(Math.abs(gas))}</div>${subGasto}</div>
+    <div class="tarjeta"><div class="etq">Ahorro + inversión</div><div class="val cifra">${eur(Math.abs(ahorro))}</div></div>
+    <div class="tarjeta"><div class="etq">Tasa de ahorro</div>
+      <div class="val cifra" style="color:${tasaAhorro >= 0 ? 'var(--acento)' : 'var(--alerta)'}">${pct(tasaAhorro)}</div>
+      <div class="sub">del ingreso, neto de gasto</div></div>
+  </div>`;
+}
+
+function barrasMensuales(d) {
+  const max = Math.max(1, ...d.porMes.map((m) => Math.max(m.ingresos, Math.abs(m.gastos))));
+  const porMes = {}; d.porMes.forEach((m) => porMes[m.mes] = m);
+
+  const cols = MESES.map((etq, i) => {
+    const m = porMes[i + 1] || { ingresos: 0, gastos: 0 };
+    const hIng = (m.ingresos / max) * 100;
+    const hGas = (Math.abs(m.gastos) / max) * 100;
+    return `<div class="mesCol">
+      <div class="mesBarras">
+        <div class="barra ingreso" style="height:${hIng}%" data-v="${eur2(m.ingresos)}"></div>
+        <div class="barra gasto" style="height:${hGas}%" data-v="${eur2(Math.abs(m.gastos))}"></div>
+      </div>
+      <div class="mesEtq">${etq}</div>
+    </div>`;
+  }).join('');
+
+  return `<div class="panel">
+    <h2>Ingresos y gastos por mes</h2>
+    <div class="barras">${cols}</div>
+    <div class="leyBarras">
+      <span><i class="puntoLeg" style="background:var(--acento)"></i> Ingresos</span>
+      <span><i class="puntoLeg" style="background:var(--alerta)"></i> Gastos</span>
+    </div>
+  </div>`;
+}
+
+function ranking(d) {
+  const top = [...d.porCategoria].sort((a, b) => a.importe - b.importe).slice(0, 10);
+  const max = Math.max(1, ...top.map((c) => Math.abs(c.importe)));
+  const filas = top.map((c) => `
+    <div class="rankFila">
+      <div class="rankNom" title="${escapar(c.categoria)}">${escapar(c.subcategoria)}</div>
+      <div class="rankBarraFondo"><div class="rankBarra" style="width:${Math.abs(c.importe)/max*100}%"></div></div>
+      <div class="rankVal cifra">${eur(Math.abs(c.importe))}</div>
+    </div>`).join('');
+  return `<div class="panel">
+    <h2>Mayores gastos del año</h2>
+    <div class="ranking">${filas || '<span style="color:var(--apagado)">sin datos</span>'}</div>
+  </div>`;
+}
+
+function reparto(d) {
+  const suma = (tipo, rep) => d.reparto.filter((r) => r.tipo === tipo && (!rep || r.reparto === rep))
+    .reduce((s, r) => s + Math.abs(r.importe), 0);
+  const fijo = suma('gasto', 'fijo');
+  const variable = suma('gasto', 'variable');
+  const ahorroInv = suma('ahorro') + suma('inversion');
+  const total = fijo + variable + ahorroInv || 1;
+
+  const pFijo = fijo / total, pVar = variable / total, pAho = ahorroInv / total;
+
+  const seg = (clase, p, etiqueta) => p < 0.03 ? '' :
+    `<div class="${clase}" style="width:${p*100}%">${p >= 0.08 ? Math.round(p*100)+'%' : ''}</div>`;
+
+  return `<div class="panel">
+    <h2>Reparto 50 / 30 / 20</h2>
+    <div class="repartoBarra">
+      ${seg('rep-fijo', pFijo)}${seg('rep-variable', pVar)}${seg('rep-ahorro', pAho)}
+    </div>
+    <div class="repartoLeyenda">
+      <div class="fila"><i class="puntoLeg" style="background:var(--tinta)"></i>
+        Fijos <b class="cifra">${pct(pFijo)}</b> <span class="obj">· objetivo 50%</span></div>
+      <div class="fila"><i class="puntoLeg" style="background:var(--alerta)"></i>
+        Variables <b class="cifra">${pct(pVar)}</b> <span class="obj">· objetivo 30%</span></div>
+      <div class="fila"><i class="puntoLeg" style="background:var(--acento)"></i>
+        Ahorro/Inversión <b class="cifra">${pct(pAho)}</b> <span class="obj">· objetivo 20%</span></div>
+    </div>
+  </div>`;
+}
+
+function pintar(d) {
+  if (d.pendiente.n > 0) {
+    $('#avisoPend').innerHTML = `<div class="aviso">
+      ⚠️ ${d.pendiente.n} movimientos de ${d.anio} sin clasificar (${eur(d.pendiente.importe)}).
+      Estos números no los incluyen todavía. <a href="/">Ir a la bandeja →</a>
+    </div>`;
+  } else {
+    $('#avisoPend').innerHTML = '';
+  }
+
+  $('#contenido').innerHTML = `
+    ${tarjetas(d)}
+    <div class="paneles">${barrasMensuales(d)}${ranking(d)}</div>
+    ${reparto(d)}
+  `;
+}
+
+async function cargar(anio) {
+  const d = await api('/api/dashboard' + (anio ? '?anio=' + anio : ''));
+  if ($('#anio').options.length !== d.anios.length) {
+    $('#anio').innerHTML = d.anios.map((a) =>
+      `<option value="${a}" ${a === d.anio ? 'selected' : ''}>${a}</option>`).join('');
+  }
+  pintar(d);
+}
+
+$('#anio').onchange = () => cargar(Number($('#anio').value));
+cargar().catch((e) => $('#contenido').innerHTML = `<div class="aviso">No se pudo cargar: ${e.message}</div>`);
+</script>
+</body>
+</html>

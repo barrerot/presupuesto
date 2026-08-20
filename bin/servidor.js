@@ -7,12 +7,30 @@
 
 const express = require('express');
 const path = require('path');
+const fs = require('fs');
+const multer = require('multer');
 const { pool } = require('../src/db');
-const { reclasificar } = require('../src/importador');
+const { importar, reclasificar } = require('../src/importador');
 
 const app = express();
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '..', 'public')));
+
+// Los ficheros subidos se guardan con timestamp para no chocar entre sí,
+// pero conservando el nombre original: el importador solo mira la extensión.
+const dirSubidas = path.join(__dirname, '..', 'uploads');
+fs.mkdirSync(dirSubidas, { recursive: true });
+const subida = multer({
+  storage: multer.diskStorage({
+    destination: dirSubidas,
+    filename: (req, file, cb) => cb(null, `${Date.now()}-${file.originalname.replace(/[^\w.\-]/g, '_')}`),
+  }),
+  limits: { fileSize: 20 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const ok = /\.(xls|xlsx|csv)$/i.test(file.originalname);
+    cb(ok ? null : new Error('Solo se aceptan .xls, .xlsx o .csv'), ok);
+  },
+});
 
 /** Envuelve un handler async para que los errores lleguen al middleware. */
 const ruta = (fn) => (req, res, next) => fn(req, res, next).catch(next);
@@ -118,6 +136,24 @@ app.post('/api/despejar', ruta(async (req, res) => {
       WHERE id IN (?)`, [ids]
   );
   res.json({ actualizados: r.affectedRows });
+}));
+
+/**
+ * Subir y ese mismo fichero, importar. Reutiliza el importador de consola:
+ * un solo camino para los datos, tanto si entran por CLI como por navegador.
+ */
+app.post('/api/subir', subida.single('fichero'), ruta(async (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'No se recibió ningún fichero.' });
+  try {
+    const r = await importar(req.file.path);
+    res.json({
+      fichero: req.file.originalname, ...r,
+      // Ruta relativa: no interesa exponer la ruta absoluta del contenedor.
+      guardadoComo: path.basename(req.file.path),
+    });
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
 }));
 
 app.get('/api/categorias', ruta(async (req, res) => {
@@ -275,6 +311,46 @@ app.post('/api/clasificar', ruta(async (req, res) => {
 }));
 
 /** Crear regla y, opcionalmente, aplicarla al resto de pendientes. */
+/** Listado de reglas para gestionarlas: uso, categoría, todo visible. */
+app.get('/api/reglas', ruta(async (req, res) => {
+  const [filas] = await pool.query(`
+    SELECT r.id, r.patron, r.tipo_patron, r.origen, r.prioridad, r.excluir,
+           r.activa, r.aciertos, r.ultima_vez, r.categoria_id,
+           c.categoria, c.subcategoria
+      FROM reglas r JOIN categorias c ON c.id = r.categoria_id
+     ORDER BY r.prioridad ASC, r.aciertos DESC`);
+  res.json(filas);
+}));
+
+app.patch('/api/reglas/:id', ruta(async (req, res) => {
+  const id = Number(req.params.id);
+  const [[actual]] = await pool.query('SELECT * FROM reglas WHERE id = ?', [id]);
+  if (!actual) return res.status(404).json({ error: 'No existe esa regla.' });
+
+  const patron = String(req.body.patron ?? actual.patron).trim().toLowerCase();
+  const categoriaId = req.body.categoriaId ?? actual.categoria_id;
+  const prioridad = req.body.prioridad ?? actual.prioridad;
+  const excluir = req.body.excluir === undefined ? actual.excluir : (req.body.excluir ? 1 : 0);
+  const activa = req.body.activa === undefined ? actual.activa : (req.body.activa ? 1 : 0);
+
+  if (patron.length < 2) return res.status(400).json({ error: 'El patrón es demasiado corto.' });
+
+  try {
+    await pool.query(
+      `UPDATE reglas SET patron=?, categoria_id=?, prioridad=?, excluir=?, activa=? WHERE id=?`,
+      [patron, categoriaId, prioridad, excluir, activa, id]);
+  } catch (e) {
+    if (e.code === 'ER_DUP_ENTRY') return res.status(409).json({ error: 'Ya existe una regla con ese patrón.' });
+    throw e;
+  }
+  res.json({ ok: true });
+}));
+
+app.delete('/api/reglas/:id', ruta(async (req, res) => {
+  await pool.query('DELETE FROM reglas WHERE id = ?', [req.params.id]);
+  res.json({ ok: true });
+}));
+
 app.post('/api/reglas', ruta(async (req, res) => {
   const { patron, categoriaId, prioridad = 100, aplicarAhora = true } = req.body;
   const p = String(patron || '').trim().toLowerCase();
@@ -328,6 +404,61 @@ app.post('/api/reglas', ruta(async (req, res) => {
  * Un LEFT JOIN desde presupuesto se dejaría fuera las segundas, que son
  * justo las que interesa ver.
  */
+/**
+ * Datos agregados para el dashboard: todo en una sola consulta por bloque,
+ * para no ir y venir 15 veces desde el navegador cada vez que se cambia
+ * de año.
+ */
+app.get('/api/dashboard', ruta(async (req, res) => {
+  const anio = Number(req.query.anio) || new Date().getFullYear();
+
+  // 1. Ingresos y gastos por mes (real).
+  const [porMes] = await pool.query(`
+    SELECT MONTH(m.fecha) mes,
+           ROUND(SUM(CASE WHEN c.tipo='ingreso' THEN m.importe ELSE 0 END), 2) ingresos,
+           ROUND(SUM(CASE WHEN c.tipo='gasto'   THEN m.importe ELSE 0 END), 2) gastos,
+           ROUND(SUM(CASE WHEN c.tipo IN ('ahorro','inversion') THEN m.importe ELSE 0 END), 2) ahorro
+      FROM movimientos m JOIN categorias c ON c.id = m.categoria_id
+     WHERE YEAR(m.fecha) = ? AND m.estado <> 'ignorado'
+     GROUP BY MONTH(m.fecha) ORDER BY mes`, [anio]);
+
+  // 2. Gasto por categoría (para el reparto y el ranking).
+  const [porCategoria] = await pool.query(`
+    SELECT c.categoria, c.subcategoria, c.tipo, c.reparto,
+           ROUND(SUM(m.importe), 2) importe, COUNT(*) n
+      FROM movimientos m JOIN categorias c ON c.id = m.categoria_id
+     WHERE YEAR(m.fecha) = ? AND m.estado <> 'ignorado' AND c.tipo = 'gasto'
+     GROUP BY c.id, c.categoria, c.subcategoria, c.tipo, c.reparto
+     ORDER BY importe ASC`, [anio]);
+
+  // 3. Reparto 50/30/20: fijo, variable, ahorro+inversión.
+  const [reparto] = await pool.query(`
+    SELECT c.reparto, c.tipo, ROUND(SUM(m.importe), 2) importe
+      FROM movimientos m JOIN categorias c ON c.id = m.categoria_id
+     WHERE YEAR(m.fecha) = ? AND m.estado <> 'ignorado'
+       AND c.tipo IN ('gasto','ahorro','inversion')
+     GROUP BY c.reparto, c.tipo`, [anio]);
+
+  // 4. Comparación con el año anterior, para ver tendencia.
+  const [comparativa] = await pool.query(`
+    SELECT YEAR(m.fecha) anio,
+           ROUND(SUM(CASE WHEN c.tipo='ingreso' THEN m.importe ELSE 0 END), 2) ingresos,
+           ROUND(SUM(CASE WHEN c.tipo='gasto'   THEN m.importe ELSE 0 END), 2) gastos
+      FROM movimientos m JOIN categorias c ON c.id = m.categoria_id
+     WHERE YEAR(m.fecha) IN (?, ?) AND m.estado <> 'ignorado'
+     GROUP BY YEAR(m.fecha)`, [anio, anio - 1]);
+
+  // 5. Estado de la clasificación, para el aviso de fiabilidad.
+  const [[pend]] = await pool.query(`
+    SELECT COUNT(*) n, ROUND(SUM(ABS(importe)), 2) importe
+      FROM movimientos WHERE YEAR(fecha) = ? AND estado = 'pendiente'`, [anio]);
+
+  const anios = (await pool.query(
+    'SELECT DISTINCT YEAR(fecha) a FROM movimientos ORDER BY a DESC'))[0].map((r) => r.a);
+
+  res.json({ anio, anios, porMes, porCategoria, reparto, comparativa, pendiente: pend });
+}));
+
 app.get('/api/anual', ruta(async (req, res) => {
   const anio = Number(req.query.anio) || new Date().getFullYear();
 

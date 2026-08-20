@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reglas</title>
+<style>
+  :root {
+    --tinta: #16191d; --papel: #f7f6f3; --linea: #dcd8d0; --apagado: #6f6a62;
+    --acento: #1d5c4f; --acento-sua: #e4efeb; --alerta: #9c3a24;
+    --alerta-sua: #f8e8e4; --radio: 3px;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--papel); color: var(--tinta);
+         font: 15px/1.5 ui-sans-serif, system-ui, "Segoe UI", sans-serif; }
+  .cifra { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+           font-variant-numeric: tabular-nums; }
+  header { border-bottom: 1px solid var(--linea); background: #fff;
+           position: sticky; top: 0; z-index: 20; }
+  .cabecera { max-width: 1200px; margin: 0 auto; padding: 13px 20px;
+              display: flex; align-items: baseline; gap: 20px; flex-wrap: wrap; }
+  h1 { font-size: 17px; margin: 0; font-weight: 600; }
+  nav a { color: var(--apagado); text-decoration: none; font-size: 14px;
+          padding: 3px 8px; border-radius: var(--radio); }
+  nav a:hover { background: var(--papel); color: var(--tinta); }
+  nav a.aqui { color: var(--acento); font-weight: 600; }
+
+  main { max-width: 1200px; margin: 0 auto; padding: 18px 20px 60px; }
+  .barra { display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+           margin-bottom: 14px; }
+  input[type=search], input[type=number] { font: inherit; padding: 7px 10px;
+    border: 1px solid var(--linea); border-radius: var(--radio); background: #fff; }
+  input[type=search] { flex: 1; min-width: 200px; }
+  button { font: inherit; padding: 7px 14px; border: 1px solid var(--tinta);
+           border-radius: var(--radio); background: var(--tinta); color: #fff; cursor: pointer; }
+  button.suave { background: #fff; color: var(--tinta); }
+  button.mini { padding: 3px 9px; font-size: 12px; }
+
+  table { width: 100%; border-collapse: collapse; background: #fff;
+          border: 1px solid var(--linea); border-radius: var(--radio); font-size: 14px; }
+  th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .06em;
+       color: var(--apagado); padding: 9px 10px; border-bottom: 1px solid var(--linea); }
+  td { padding: 7px 10px; border-bottom: 1px solid #eeebe6; vertical-align: middle; }
+  tr:last-child td { border-bottom: 0; }
+  tr.off td { opacity: .45; }
+  tr.excluye td.patron { color: var(--alerta); }
+  .patron { font-family: ui-monospace, Menlo, monospace; font-size: 13px; }
+  .cat { font-size: 13px; }
+  .catNom { font-size: 10px; color: var(--apagado); text-transform: uppercase; }
+  input.editable { width: 100%; border: 1px solid transparent; background: transparent;
+                   font: inherit; padding: 3px 5px; border-radius: 2px; }
+  input.editable:hover { border-color: var(--linea); }
+  input.editable:focus { border-color: var(--acento); outline: none; background: #fff; }
+  .num { text-align: right; }
+  .pill { font-size: 10px; padding: 1px 6px; border-radius: 8px; border: 1px solid currentColor; }
+  .aviso { padding: 10px 14px; margin-bottom: 12px; border-radius: var(--radio);
+           background: var(--acento-sua); border: 1px solid var(--acento); font-size: 14px; }
+  .aviso.mal { background: var(--alerta-sua); border-color: var(--alerta); color: var(--alerta); }
+  .combo { position: relative; min-width: 200px; }
+  .combo input { width: 100%; }
+  .combo ul { position: absolute; z-index: 30; top: calc(100% + 2px); left: 0; right: 0;
+    margin: 0; padding: 4px; list-style: none; max-height: 220px; overflow-y: auto;
+    background: #fff; border: 1px solid var(--linea); border-radius: var(--radio);
+    box-shadow: 0 6px 20px rgba(22,25,29,.13); display: none; }
+  .combo ul.abierta { display: block; }
+  .combo li { padding: 5px 8px; border-radius: var(--radio); cursor: pointer; font-size: 13px; }
+  .combo li.activa { background: var(--acento-sua); }
+  .combo li .cat { color: var(--apagado); font-size: 11px; }
+</style>
+</head>
+<body>
+<header>
+  <div class="cabecera">
+    <h1>Presupuesto</h1>
+    <nav>
+      <a href="/dashboard.html">Dashboard</a>
+      <a href="/">Bandeja</a>
+      <a href="/anual.html">Presupuesto vs real</a>
+      <a href="/reglas.html" class="aqui">Reglas</a>
+    </nav>
+  </div>
+</header>
+<main>
+  <div id="aviso"></div>
+  <div class="barra">
+    <input type="search" id="busca" placeholder="Buscar por patrón o categoría…">
+    <span id="contador" style="color:var(--apagado);font-size:13px"></span>
+  </div>
+  <div id="tabla"></div>
+</main>
+
+<script>
+const $ = (s) => document.querySelector(s);
+const escapar = (s) => String(s).replace(/[&<>"]/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const plano = (s) => String(s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+
+let reglas = [], categorias = [];
+
+async function api(url, op) {
+  const r = await fetch(url, op);
+  const t = await r.text();
+  let c = null; try { c = JSON.parse(t); } catch {}
+  if (!r.ok) throw new Error((c && c.error) || `Error ${r.status}`);
+  return c;
+}
+function avisar(t, mal) {
+  $('#aviso').innerHTML = t ? `<div class="aviso ${mal?'mal':''}">${t}</div>` : '';
+  if (t && !mal) setTimeout(() => $('#aviso').innerHTML = '', 3000);
+}
+
+function crearCombo(caja, actual, alElegir) {
+  caja.innerHTML = `<input type="text" autocomplete="off" value="${escapar(actual ? actual.categoria+' · '+actual.subcategoria : '')}"><ul></ul>`;
+  const campo = caja.querySelector('input'), lista = caja.querySelector('ul');
+  let elegida = actual, visibles = [], activa = -1;
+  const etq = (c) => `${c.categoria} · ${c.subcategoria}`;
+  function filtrar(t) {
+    const partes = plano(t).split(/\s+/).filter(Boolean);
+    if (!partes.length) return categorias.slice(0, 40);
+    return categorias.filter((c) => partes.every((p) => plano(etq(c)).includes(p))).slice(0, 40);
+  }
+  function pintar() {
+    lista.innerHTML = visibles.map((c, i) =>
+      `<li data-i="${i}" class="${i===activa?'activa':''}">${escapar(c.subcategoria)} <span class="cat">· ${escapar(c.categoria)}</span></li>`).join('')
+      || '<li class="cat">sin resultados</li>';
+    lista.querySelectorAll('li[data-i]').forEach((li) => li.onmousedown = (e) => { e.preventDefault(); elegir(visibles[+li.dataset.i]); });
+  }
+  function elegir(c) { elegida = c; campo.value = etq(c); lista.classList.remove('abierta'); alElegir(c); }
+  campo.oninput = () => { visibles = filtrar(campo.value); activa = 0; lista.classList.add('abierta'); pintar(); };
+  campo.onfocus = () => { visibles = filtrar(campo.value); activa = 0; lista.classList.add('abierta'); pintar(); };
+  campo.onblur = () => setTimeout(() => lista.classList.remove('abierta'), 150);
+  campo.onkeydown = (e) => {
+    if (e.key === 'ArrowDown') { e.preventDefault(); activa = Math.min(visibles.length-1, activa+1); pintar(); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); activa = Math.max(0, activa-1); pintar(); }
+    else if (e.key === 'Enter' && visibles[activa]) { e.preventDefault(); elegir(visibles[activa]); }
+  };
+  return { valor: () => elegida && elegida.id };
+}
+
+function pintar() {
+  const q = plano($('#busca').value);
+  const vistas = q ? reglas.filter((r) => plano(r.patron+' '+r.categoria+' '+r.subcategoria).includes(q)) : reglas;
+  $('#contador').textContent = `${vistas.length} de ${reglas.length}`;
+
+  $('#tabla').innerHTML = `<table>
+    <thead><tr>
+      <th style="width:26%">Patrón</th><th>Categoría</th>
+      <th style="width:70px" class="num">Prioridad</th>
+      <th style="width:60px" class="num">Aciertos</th>
+      <th style="width:70px">Estado</th><th style="width:150px"></th>
+    </tr></thead>
+    <tbody>${vistas.map((r) => `
+      <tr data-id="${r.id}" class="${r.activa ? '' : 'off'} ${r.excluir ? 'excluye' : ''}">
+        <td class="patron"><input class="editable" data-campo="patron" value="${escapar(r.patron)}"></td>
+        <td><div class="combo" data-campo="categoria"></div></td>
+        <td class="num"><input class="editable num" type="number" data-campo="prioridad" value="${r.prioridad}" style="width:56px"></td>
+        <td class="num cifra">${r.aciertos}</td>
+        <td>${r.excluir ? '<span class="pill" style="color:var(--apagado)">excluye</span>' : '<span class="pill" style="color:var(--acento)">clasifica</span>'}</td>
+        <td>
+          <button class="suave mini" data-accion="activar">${r.activa ? 'Desactivar' : 'Activar'}</button>
+          <button class="suave mini" data-accion="borrar">Borrar</button>
+        </td>
+      </tr>`).join('')}</tbody></table>`;
+
+  vistas.forEach((r) => {
+    const fila = document.querySelector(`tr[data-id="${r.id}"]`);
+    const combo = crearCombo(fila.querySelector('[data-campo=categoria]'),
+      { categoria: r.categoria, subcategoria: r.subcategoria },
+      (c) => guardar(r.id, { categoriaId: c.id }));
+
+    fila.querySelectorAll('input.editable').forEach((inp) => {
+      inp.onchange = () => {
+        const campo = inp.dataset.campo;
+        guardar(r.id, { [campo]: campo === 'prioridad' ? Number(inp.value) : inp.value });
+      };
+    });
+    fila.querySelector('[data-accion=activar]').onclick = () => guardar(r.id, { activa: r.activa ? 0 : 1 });
+    fila.querySelector('[data-accion=borrar]').onclick = async () => {
+      if (!confirm(`¿Borrar la regla «${r.patron}»?`)) return;
+      try { await api('/api/reglas/' + r.id, { method: 'DELETE' }); await cargar(); avisar('Regla borrada.'); }
+      catch (e) { avisar(e.message, true); }
+    };
+  });
+}
+
+async function guardar(id, cambios) {
+  try {
+    await api('/api/reglas/' + id, { method: 'PATCH', headers: {'Content-Type':'application/json'}, body: JSON.stringify(cambios) });
+    await cargar();
+  } catch (e) { avisar(e.message, true); }
+}
+
+async function cargar() {
+  [reglas, categorias] = await Promise.all([api('/api/reglas'), api('/api/categorias')]);
+  pintar();
+}
+
+let t; $('#busca').oninput = () => { clearTimeout(t); t = setTimeout(pintar, 150); };
+cargar().catch((e) => avisar('No se pudo cargar: ' + e.message, true));
+</script>
+</body>
+</html>

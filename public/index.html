@@ -1,600 +1,1111 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Presupuesto — Bandeja</title>
-<style>
-  :root {
-    --tinta:      #16191d;
-    --papel:      #f7f6f3;
-    --linea:      #dcd8d0;
-    --apagado:    #6f6a62;
-    --acento:     #1d5c4f;
-    --acento-sua: #e4efeb;
-    --alerta:     #9c3a24;
-    --radio: 3px;
-  }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0; background: var(--papel); color: var(--tinta);
-    font: 15px/1.5 ui-sans-serif, system-ui, "Segoe UI", sans-serif;
-  }
-  .cifra { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-           font-variant-numeric: tabular-nums; }
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Presupuesto — Bandeja</title>
+    <style>
+      :root {
+        --tinta: #16191d;
+        --papel: #f7f6f3;
+        --linea: #dcd8d0;
+        --apagado: #6f6a62;
+        --acento: #1d5c4f;
+        --acento-sua: #e4efeb;
+        --alerta: #9c3a24;
+        --radio: 3px;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--papel);
+        color: var(--tinta);
+        font:
+          15px/1.5 ui-sans-serif,
+          system-ui,
+          "Segoe UI",
+          sans-serif;
+      }
+      .cifra {
+        font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+        font-variant-numeric: tabular-nums;
+      }
 
-  header {
-    border-bottom: 1px solid var(--linea); background: #fff;
-    position: sticky; top: 0; z-index: 10;
-  }
-  .cabecera { max-width: 1100px; margin: 0 auto; padding: 14px 20px;
-              display: flex; align-items: baseline; gap: 24px; flex-wrap: wrap; }
-  h1 { font-size: 17px; margin: 0; font-weight: 600; letter-spacing: -.01em; }
-  nav a { color: var(--apagado); text-decoration: none; font-size: 14px;
-          padding: 3px 8px; border-radius: var(--radio); }
-  nav a:hover { background: var(--papel); color: var(--tinta); }
-  nav a.aqui { color: var(--acento); font-weight: 600; }
-  .marcadores { display: flex; gap: 22px; margin-left: auto; font-size: 13px; }
-  .marcador b { display: block; font-size: 19px; font-weight: 600; }
-  .marcador span { color: var(--apagado); }
+      header {
+        border-bottom: 1px solid var(--linea);
+        background: #fff;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+      }
+      .cabecera {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 14px 20px;
+        display: flex;
+        align-items: baseline;
+        gap: 24px;
+        flex-wrap: wrap;
+      }
+      h1 {
+        font-size: 17px;
+        margin: 0;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+      }
+      nav a {
+        color: var(--apagado);
+        text-decoration: none;
+        font-size: 14px;
+        padding: 3px 8px;
+        border-radius: var(--radio);
+      }
+      nav a:hover {
+        background: var(--papel);
+        color: var(--tinta);
+      }
+      nav a.aqui {
+        color: var(--acento);
+        font-weight: 600;
+      }
+      .marcadores {
+        display: flex;
+        gap: 22px;
+        margin-left: auto;
+        font-size: 13px;
+      }
+      .marcador b {
+        display: block;
+        font-size: 19px;
+        font-weight: 600;
+      }
+      .marcador span {
+        color: var(--apagado);
+      }
 
-  main { max-width: 1100px; margin: 0 auto; padding: 20px; }
+      main {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 20px;
+      }
 
-  .barra { display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
-           margin-bottom: 14px; }
-  input[type=search], select {
-    font: inherit; padding: 7px 10px; border: 1px solid var(--linea);
-    border-radius: var(--radio); background: #fff; color: inherit;
-  }
-  input[type=search] { flex: 1; min-width: 200px; }
-  button {
-    font: inherit; padding: 7px 14px; border: 1px solid var(--tinta);
-    border-radius: var(--radio); background: var(--tinta); color: #fff;
-    cursor: pointer;
-  }
-  button.suave { background: #fff; color: var(--tinta); }
-  button:disabled { opacity: .35; cursor: default; }
-  button:focus-visible, input:focus-visible, select:focus-visible {
-    outline: 2px solid var(--acento); outline-offset: 1px;
-  }
+      .barra {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        flex-wrap: wrap;
+        margin-bottom: 14px;
+      }
+      input[type="search"],
+      select {
+        font: inherit;
+        padding: 7px 10px;
+        border: 1px solid var(--linea);
+        border-radius: var(--radio);
+        background: #fff;
+        color: inherit;
+      }
+      input[type="search"] {
+        flex: 1;
+        min-width: 200px;
+      }
+      button {
+        font: inherit;
+        padding: 7px 14px;
+        border: 1px solid var(--tinta);
+        border-radius: var(--radio);
+        background: var(--tinta);
+        color: #fff;
+        cursor: pointer;
+      }
+      button.suave {
+        background: #fff;
+        color: var(--tinta);
+      }
+      button:disabled {
+        opacity: 0.35;
+        cursor: default;
+      }
+      button:focus-visible,
+      input:focus-visible,
+      select:focus-visible {
+        outline: 2px solid var(--acento);
+        outline-offset: 1px;
+      }
 
-  /* Aparece solo cuando hay selección: la acción sigue a la intención. */
-  .lote {
-    display: none; gap: 10px; align-items: center; flex-wrap: wrap;
-    padding: 11px 14px; margin-bottom: 14px;
-    background: var(--acento-sua); border: 1px solid var(--acento);
-    border-radius: var(--radio);
-  }
-  .lote.visible { display: flex; }
-  .lote strong { font-size: 14px; }
-  .lote button { border-color: var(--acento); background: var(--acento); }
-  .lote button.suave { background: #fff; color: var(--acento); }
+      /* Aparece solo cuando hay selección: la acción sigue a la intención. */
+      .lote {
+        display: none;
+        gap: 10px;
+        align-items: center;
+        flex-wrap: wrap;
+        padding: 11px 14px;
+        margin-bottom: 14px;
+        background: var(--acento-sua);
+        border: 1px solid var(--acento);
+        border-radius: var(--radio);
+      }
+      .lote.visible {
+        display: flex;
+      }
+      .lote strong {
+        font-size: 14px;
+      }
+      .lote button {
+        border-color: var(--acento);
+        background: var(--acento);
+      }
+      .lote button.suave {
+        background: #fff;
+        color: var(--acento);
+      }
 
-  /* --- tabla ------------------------------------------------------------ */
-  /* OJO: nada de overflow aquí. Un overflow distinto de visible convierte a
+      /* --- tabla ------------------------------------------------------------ */
+      /* OJO: nada de overflow aquí. Un overflow distinto de visible convierte a
      .marco en el contenedor de referencia del sticky de la cabecera, y como
      no tiene scroll propio la empuja hacia abajo dejando un hueco en blanco
      del alto del `top`. Las esquinas se redondean en las celdas extremas. */
-  .marco { background: #fff; border: 1px solid var(--linea);
-           border-radius: var(--radio); }
-  .marco > table { border-radius: inherit; }
-  .marco thead tr:first-child th:first-child { border-top-left-radius: inherit; }
-  .marco thead tr:first-child th:last-child  { border-top-right-radius: inherit; }
-  table { width: 100%; border-collapse: separate; border-spacing: 0; }
+      .marco {
+        background: #fff;
+        border: 1px solid var(--linea);
+        border-radius: var(--radio);
+      }
+      .marco > table {
+        border-radius: inherit;
+      }
+      .marco thead tr:first-child th:first-child {
+        border-top-left-radius: inherit;
+      }
+      .marco thead tr:first-child th:last-child {
+        border-top-right-radius: inherit;
+      }
+      table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+      }
 
-  thead th {
-    position: sticky; top: var(--altoCabecera, 52px); z-index: 6; background: #fbfaf8;
-    text-align: left; font-size: 11px; text-transform: uppercase;
-    letter-spacing: .07em; color: var(--apagado); font-weight: 600;
-    padding: 0; border-bottom: 1px solid var(--linea);
-  }
-  /* Cabecera pulsable: toda la celda ordena, no solo el texto. */
-  th .orden {
-    display: flex; align-items: center; gap: 5px; width: 100%;
-    padding: 9px 12px; background: none; border: 0; border-radius: 0;
-    color: inherit; font: inherit; text-transform: inherit;
-    letter-spacing: inherit; cursor: pointer;
-  }
-  th .orden:hover { background: #f2efe9; color: var(--tinta); }
-  th.num .orden { justify-content: flex-end; }
-  th .flecha { opacity: 0; font-size: 9px; transition: opacity .12s; }
-  th.activa .orden { color: var(--acento); }
-  th.activa .flecha { opacity: 1; }
+      thead th {
+        position: sticky;
+        top: var(--altoCabecera, 52px);
+        z-index: 6;
+        background: #fbfaf8;
+        text-align: left;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        color: var(--apagado);
+        font-weight: 600;
+        padding: 0;
+        border-bottom: 1px solid var(--linea);
+      }
+      /* Cabecera pulsable: toda la celda ordena, no solo el texto. */
+      th .orden {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        width: 100%;
+        padding: 9px 12px;
+        background: none;
+        border: 0;
+        border-radius: 0;
+        color: inherit;
+        font: inherit;
+        text-transform: inherit;
+        letter-spacing: inherit;
+        cursor: pointer;
+      }
+      th .orden:hover {
+        background: #f2efe9;
+        color: var(--tinta);
+      }
+      th.num .orden {
+        justify-content: flex-end;
+      }
+      th .flecha {
+        opacity: 0;
+        font-size: 9px;
+        transition: opacity 0.12s;
+      }
+      th.activa .orden {
+        color: var(--acento);
+      }
+      th.activa .flecha {
+        opacity: 1;
+      }
 
-  tr.filtros th { position: sticky; top: calc(var(--altoCabecera, 52px) + var(--altoTh, 34px));
-                  z-index: 5; background: #fff;
-                  padding: 6px 8px; border-bottom: 1px solid var(--linea); }
-  tr.filtros input, tr.filtros select {
-    width: 100%; padding: 4px 7px; font-size: 12px; font-weight: 400;
-    text-transform: none; letter-spacing: 0;
-  }
-  .rango { display: flex; gap: 4px; }
+      tr.filtros th {
+        position: sticky;
+        top: calc(var(--altoCabecera, 52px) + var(--altoTh, 34px));
+        z-index: 5;
+        background: #fff;
+        padding: 6px 8px;
+        border-bottom: 1px solid var(--linea);
+      }
+      tr.filtros input,
+      tr.filtros select {
+        width: 100%;
+        padding: 4px 7px;
+        font-size: 12px;
+        font-weight: 400;
+        text-transform: none;
+        letter-spacing: 0;
+      }
+      .rango {
+        display: flex;
+        gap: 4px;
+      }
 
-  tbody td { padding: 9px 12px; border-bottom: 1px solid #f1eee9;
-             vertical-align: middle; }
-  tbody tr:last-child td { border-bottom: 0; }
-  tbody tr:hover td { background: #fbfaf8; }
-  tbody tr.marcada td, tbody tr.marcada:hover td { background: var(--acento-sua); }
-  td.num { text-align: right; white-space: nowrap; }
-  td.concepto { max-width: 0; overflow: hidden; text-overflow: ellipsis;
-                white-space: nowrap; }
-  .negativo { color: var(--alerta); }
-  .fuente { font-size: 10px; color: var(--apagado); text-transform: uppercase;
-            letter-spacing: .06em; }
-  input[type=checkbox] { width: 15px; height: 15px; cursor: pointer; }
+      tbody td {
+        padding: 9px 12px;
+        border-bottom: 1px solid #f1eee9;
+        vertical-align: middle;
+      }
+      tbody tr:last-child td {
+        border-bottom: 0;
+      }
+      tbody tr:hover td {
+        background: #fbfaf8;
+      }
+      tbody tr.marcada td,
+      tbody tr.marcada:hover td {
+        background: var(--acento-sua);
+      }
+      td.num {
+        text-align: right;
+        white-space: nowrap;
+      }
+      td.concepto {
+        max-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .negativo {
+        color: var(--alerta);
+      }
+      .fuente {
+        font-size: 10px;
+        color: var(--apagado);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+      }
+      input[type="checkbox"] {
+        width: 15px;
+        height: 15px;
+        cursor: pointer;
+      }
 
-  .pie { display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
-         padding: 11px 14px; border-top: 1px solid var(--linea);
-         background: #fbfaf8; font-size: 13px; color: var(--apagado); }
-  .pie .paginas { margin-left: auto; display: flex; align-items: center; gap: 7px; }
-  .pie button { padding: 4px 11px; font-size: 13px; }
+      .pie {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        flex-wrap: wrap;
+        padding: 11px 14px;
+        border-top: 1px solid var(--linea);
+        background: #fbfaf8;
+        font-size: 13px;
+        color: var(--apagado);
+      }
+      .pie .paginas {
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        gap: 7px;
+      }
+      .pie button {
+        padding: 4px 11px;
+        font-size: 13px;
+      }
 
-  /* Solo se enciende cuando hay algo que quitar: si está siempre igual,
+      /* Solo se enciende cuando hay algo que quitar: si está siempre igual,
      deja de leerse. */
-  #btnLimpiarFiltros { transition: opacity .12s; }
-  #btnLimpiarFiltros[disabled] { opacity: .3; }
-  #btnLimpiarFiltros.activo {
-    background: var(--acento); border-color: var(--acento); color: #fff;
-  }
-  .aspa {
-    width: 22px; height: 22px; padding: 0; line-height: 1;
-    border: 0; background: none; color: var(--apagado);
-    font-size: 15px; cursor: pointer; border-radius: 50%;
-  }
-  .aspa:hover { background: #f2efe9; color: var(--alerta); }
-  .aspa[disabled] { opacity: .25; cursor: default; }
+      #btnLimpiarFiltros {
+        transition: opacity 0.12s;
+      }
+      #btnLimpiarFiltros[disabled] {
+        opacity: 0.3;
+      }
+      #btnLimpiarFiltros.activo {
+        background: var(--acento);
+        border-color: var(--acento);
+        color: #fff;
+      }
+      .aspa {
+        width: 22px;
+        height: 22px;
+        padding: 0;
+        line-height: 1;
+        border: 0;
+        background: none;
+        color: var(--apagado);
+        font-size: 15px;
+        cursor: pointer;
+        border-radius: 50%;
+      }
+      .aspa:hover {
+        background: #f2efe9;
+        color: var(--alerta);
+      }
+      .aspa[disabled] {
+        opacity: 0.25;
+        cursor: default;
+      }
 
-  td.cat { max-width: 0; overflow: hidden; white-space: nowrap;
-           text-overflow: ellipsis; line-height: 1.25; }
-  td.cat .sub { font-size: 13px; }
-  td.cat .catNom { font-size: 10px; color: var(--apagado);
-                   text-transform: uppercase; letter-spacing: .05em; }
-  .sinCat { color: var(--apagado); font-style: italic; font-size: 13px; }
-  /* El tipo decide de qué lado del presupuesto cae: merece verse de un vistazo. */
-  .pastilla { font-size: 9px; text-transform: uppercase; letter-spacing: .06em;
-              padding: 1px 5px; border-radius: 8px; vertical-align: 1px;
-              border: 1px solid currentColor; }
-  .t-gasto     { color: var(--alerta); }
-  .t-ingreso   { color: var(--acento); }
-  .t-ahorro,
-  .t-inversion { color: #6a4b9c; }
-  .t-traspaso  { color: var(--apagado); }
+      td.cat {
+        max-width: 0;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        line-height: 1.25;
+      }
+      td.cat .sub {
+        font-size: 13px;
+      }
+      td.cat .catNom {
+        font-size: 10px;
+        color: var(--apagado);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+      .sinCat {
+        color: var(--apagado);
+        font-style: italic;
+        font-size: 13px;
+      }
+      /* El tipo decide de qué lado del presupuesto cae: merece verse de un vistazo. */
+      .pastilla {
+        font-size: 9px;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        padding: 1px 5px;
+        border-radius: 8px;
+        vertical-align: 1px;
+        border: 1px solid currentColor;
+      }
+      .t-gasto {
+        color: var(--alerta);
+      }
+      .t-ingreso {
+        color: var(--acento);
+      }
+      .t-ahorro,
+      .t-inversion {
+        color: #6a4b9c;
+      }
+      .t-traspaso {
+        color: var(--apagado);
+      }
 
-  .todos-coinciden {
-    padding: 8px 14px; background: var(--acento-sua);
-    border-bottom: 1px solid var(--acento); font-size: 13px; text-align: center;
-  }
+      .todos-coinciden {
+        padding: 8px 14px;
+        background: var(--acento-sua);
+        border-bottom: 1px solid var(--acento);
+        font-size: 13px;
+        text-align: center;
+      }
 
-  /* Combobox: escribir filtra; con 125 categorías el select es inservible. */
-  .combo { position: relative; }
-  .combo input { width: 100%; }
-  .combo input.elegida { border-color: var(--acento); }
-  .combo ul {
-    position: absolute; z-index: 40; top: calc(100% + 2px); left: 0; right: 0;
-    margin: 0; padding: 4px; list-style: none; max-height: 260px; overflow-y: auto;
-    background: #fff; border: 1px solid var(--linea); border-radius: var(--radio);
-    box-shadow: 0 6px 20px rgba(22,25,29,.13); display: none;
-  }
-  .combo ul.abierta { display: block; }
-  .combo li {
-    padding: 6px 9px; border-radius: var(--radio); cursor: pointer; font-size: 14px;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  }
-  .combo li.activa { background: var(--acento-sua); }
-  .combo li mark { background: none; color: var(--acento); font-weight: 600; }
-  .combo li .cat { color: var(--apagado); font-size: 12px; }
-  .combo li.nada { color: var(--apagado); cursor: default; }
-  .combo li.crear { color: var(--acento); border-top: 1px solid var(--linea);
-                    margin-top: 4px; padding-top: 8px; }
-  .lote .combo { flex: 1; min-width: 240px; }
+      /* Combobox: escribir filtra; con 125 categorías el select es inservible. */
+      .combo {
+        position: relative;
+      }
+      .combo input {
+        width: 100%;
+      }
+      .combo input.elegida {
+        border-color: var(--acento);
+      }
+      .combo ul {
+        position: absolute;
+        z-index: 40;
+        top: calc(100% + 2px);
+        left: 0;
+        right: 0;
+        margin: 0;
+        padding: 4px;
+        list-style: none;
+        max-height: 260px;
+        overflow-y: auto;
+        background: #fff;
+        border: 1px solid var(--linea);
+        border-radius: var(--radio);
+        box-shadow: 0 6px 20px rgba(22, 25, 29, 0.13);
+        display: none;
+      }
+      .combo ul.abierta {
+        display: block;
+      }
+      .combo li {
+        padding: 6px 9px;
+        border-radius: var(--radio);
+        cursor: pointer;
+        font-size: 14px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .combo li.activa {
+        background: var(--acento-sua);
+      }
+      .combo li mark {
+        background: none;
+        color: var(--acento);
+        font-weight: 600;
+      }
+      .combo li .cat {
+        color: var(--apagado);
+        font-size: 12px;
+      }
+      .combo li.nada {
+        color: var(--apagado);
+        cursor: default;
+      }
+      .combo li.crear {
+        color: var(--acento);
+        border-top: 1px solid var(--linea);
+        margin-top: 4px;
+        padding-top: 8px;
+      }
+      .lote .combo {
+        flex: 1;
+        min-width: 240px;
+      }
 
-  .vacio { padding: 60px 20px; text-align: center; color: var(--apagado); }
-  .vacio b { display: block; font-size: 17px; color: var(--tinta); margin-bottom: 6px; }
+      .vacio {
+        padding: 60px 20px;
+        text-align: center;
+        color: var(--apagado);
+      }
+      .vacio b {
+        display: block;
+        font-size: 17px;
+        color: var(--tinta);
+        margin-bottom: 6px;
+      }
 
-  .aviso { padding: 10px 14px; margin-bottom: 14px; border-radius: var(--radio);
-           background: var(--acento-sua); border: 1px solid var(--acento);
-           font-size: 14px; }
-  .aviso.mal { background: #f8e8e4; border-color: var(--alerta); color: var(--alerta); }
+      .aviso {
+        padding: 10px 14px;
+        margin-bottom: 14px;
+        border-radius: var(--radio);
+        background: var(--acento-sua);
+        border: 1px solid var(--acento);
+        font-size: 14px;
+      }
+      .aviso.mal {
+        background: #f8e8e4;
+        border-color: var(--alerta);
+        color: var(--alerta);
+      }
 
-  dialog { border: 1px solid var(--linea); border-radius: var(--radio);
-           padding: 0; max-width: 520px; width: 92%; }
-  dialog::backdrop { background: rgba(22,25,29,.4); }
-  .dlg { padding: 20px; }
-  .dlg h2 { margin: 0 0 4px; font-size: 16px; }
-  .dlg p { margin: 0 0 16px; color: var(--apagado); font-size: 14px; }
-  .dlg label { display: block; font-size: 12px; text-transform: uppercase;
-               letter-spacing: .06em; color: var(--apagado); margin: 12px 0 5px; }
-  .dlg input, .dlg select { width: 100%; }
-  .dlg .acciones { display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px; }
-  .impacto { font-size: 13px; color: var(--acento); margin-top: 7px; min-height: 19px; }
+      dialog {
+        border: 1px solid var(--linea);
+        border-radius: var(--radio);
+        padding: 0;
+        max-width: 520px;
+        width: 92%;
+      }
+      dialog::backdrop {
+        background: rgba(22, 25, 29, 0.4);
+      }
+      .dlg {
+        padding: 20px;
+      }
+      .dlg h2 {
+        margin: 0 0 4px;
+        font-size: 16px;
+      }
+      .dlg p {
+        margin: 0 0 16px;
+        color: var(--apagado);
+        font-size: 14px;
+      }
+      .dlg label {
+        display: block;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--apagado);
+        margin: 12px 0 5px;
+      }
+      .dlg input,
+      .dlg select {
+        width: 100%;
+      }
+      .dlg .acciones {
+        display: flex;
+        gap: 8px;
+        justify-content: flex-end;
+        margin-top: 20px;
+      }
+      .impacto {
+        font-size: 13px;
+        color: var(--acento);
+        margin-top: 7px;
+        min-height: 19px;
+      }
 
-  dialog.ancho { max-width: 760px; }
-  .campos { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
-  .campos .full { grid-column: 1 / -1; }
-  .enlace { background: none; border: 0; color: var(--acento); padding: 0;
-            font-size: 13px; text-decoration: underline; cursor: pointer; }
-  .tablaCat { width: 100%; border-collapse: collapse; font-size: 14px; }
-  .tablaCat th { position: sticky; top: 0; background: #fff; }
-  .tablaCat td { padding: 5px 8px; border-bottom: 1px solid #eeebe6; }
-  .tablaCat tr.off td { color: var(--apagado); font-style: italic; }
-  .scroll { max-height: 52vh; overflow-y: auto; border: 1px solid var(--linea);
-            border-radius: var(--radio); }
-  .mini { font-size: 12px; padding: 3px 8px; }
-  .etiqueta { font-size: 11px; text-transform: uppercase; letter-spacing: .05em;
-              color: var(--apagado); }
-</style>
-</head>
-<body>
-
-<header>
-  <div class="cabecera">
-    <h1>Presupuesto</h1>
-    <nav>
-      <a href="/dashboard.html">Dashboard</a>
-      <a href="/" class="aqui">Bandeja</a>
-      <a href="/anual.html">Presupuesto vs real</a>
-      <a href="/reglas.html">Reglas</a>
-    </nav>
-    <div class="marcadores">
-      <div class="marcador"><b class="cifra" id="mPend">–</b><span>por clasificar</span></div>
-      <div class="marcador"><b class="cifra" id="mImporte">–</b><span>sin asignar</span></div>
-      <div class="marcador"><b class="cifra" id="mPct">–</b><span>clasificado</span></div>
-    </div>
-  </div>
-</header>
-
-<main>
-  <div id="aviso"></div>
-
-  <div class="barra">
-    <button class="suave" id="btnLimpiarFiltros">Quitar filtros</button>
-    <span style="margin-left:auto"></span>
-    <button id="btnSubir">Subir extracto…</button>
-    <button class="suave" id="btnReclasificar">Reaplicar reglas</button>
-    <button class="suave" id="btnCategorias">Categorías</button>
-    <input type="file" id="ficheroSubida" accept=".xls,.xlsx,.csv" style="display:none">
-  </div>
-
-  <div class="lote" id="lote">
-    <strong><span id="nSel">0</span> seleccionados</strong>
-    <div class="combo" id="catLote"></div>
-    <button id="btnAsignar">Asignar categoría</button>
-    <button class="suave" id="btnRegla">Crear regla…</button>
-    <button class="suave" id="btnIgnorar">Ignorar</button>
-    <button class="suave" id="btnDespejar">Devolver a bandeja</button>
-    <button class="suave" id="btnLimpiar">Quitar selección</button>
-  </div>
-
-  <div id="tabla"></div>
-</main>
-
-<dialog id="dlgSubir">
-  <div class="dlg">
-    <div class="avisoDlg"></div>
-    <h2>Subir extracto</h2>
-    <p>El .xls del banco o el .csv de PayPal. Se comprueba solo: lo ya importado no se duplica.</p>
-    <div id="resumenSubida" style="font-size:13px;color:var(--apagado);min-height:20px"></div>
-    <div class="acciones">
-      <button class="suave" id="btnSubirCancelar">Cerrar</button>
-      <button id="btnSubirElegir">Elegir fichero…</button>
-    </div>
-  </div>
-</dialog>
-
-<dialog id="dlgCat">
-  <div class="dlg">
-    <div class="avisoDlg"></div>
-    <h2 id="tituloCat">Nueva categoría</h2>
-    <p>La categoría agrupa; la subcategoría es lo que eliges al clasificar.</p>
-    <div class="campos">
-      <div>
-        <label for="cCategoria">Categoría</label>
-        <input id="cCategoria" list="listaCats" autocomplete="off" placeholder="VIVIENDA">
-        <datalist id="listaCats"></datalist>
+      dialog.ancho {
+        max-width: 760px;
+      }
+      .campos {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0 12px;
+      }
+      .campos .full {
+        grid-column: 1 / -1;
+      }
+      .enlace {
+        background: none;
+        border: 0;
+        color: var(--acento);
+        padding: 0;
+        font-size: 13px;
+        text-decoration: underline;
+        cursor: pointer;
+      }
+      .tablaCat {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+      }
+      .tablaCat th {
+        position: sticky;
+        top: 0;
+        background: #fff;
+      }
+      .tablaCat td {
+        padding: 5px 8px;
+        border-bottom: 1px solid #eeebe6;
+      }
+      .tablaCat tr.off td {
+        color: var(--apagado);
+        font-style: italic;
+      }
+      .scroll {
+        max-height: 52vh;
+        overflow-y: auto;
+        border: 1px solid var(--linea);
+        border-radius: var(--radio);
+      }
+      .mini {
+        font-size: 12px;
+        padding: 3px 8px;
+      }
+      .etiqueta {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--apagado);
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="cabecera">
+        <h1>Presupuesto</h1>
+        <nav>
+          <a href="/dashboard.html">Dashboard</a>
+          <a href="/" class="aqui">Bandeja</a>
+          <a href="/anual.html">Presupuesto vs real</a>
+          <a href="/reglas.html">Reglas</a>
+        </nav>
+        <div class="marcadores">
+          <div class="marcador">
+            <b class="cifra" id="mPend">–</b><span>por clasificar</span>
+          </div>
+          <div class="marcador">
+            <b class="cifra" id="mImporte">–</b><span>sin asignar</span>
+          </div>
+          <div class="marcador">
+            <b class="cifra" id="mPct">–</b><span>clasificado</span>
+          </div>
+        </div>
       </div>
-      <div>
-        <label for="cSub">Subcategoría</label>
-        <input id="cSub" autocomplete="off" placeholder="Trastero">
+    </header>
+
+    <main>
+      <div id="aviso"></div>
+
+      <div class="barra">
+        <button class="suave" id="btnLimpiarFiltros">Quitar filtros</button>
+        <span style="margin-left: auto"></span>
+        <button id="btnSubir">Subir extracto…</button>
+        <button class="suave" id="btnReclasificar">Reaplicar reglas</button>
+        <button class="suave" id="btnCategorias">Categorías</button>
+        <input
+          type="file"
+          id="ficheroSubida"
+          accept=".xls,.xlsx,.csv"
+          style="display: none"
+        />
       </div>
-      <div>
-        <label for="cTipo">Tipo</label>
-        <select id="cTipo">
-          <option value="gasto">Gasto</option>
-          <option value="ingreso">Ingreso</option>
-          <option value="ahorro">Ahorro</option>
-          <option value="inversion">Inversión</option>
-          <option value="traspaso">Traspaso (fuera del cómputo)</option>
-        </select>
+
+      <div class="lote" id="lote">
+        <strong><span id="nSel">0</span> seleccionados</strong>
+        <div class="combo" id="catLote"></div>
+        <button id="btnAsignar">Asignar categoría</button>
+        <button class="suave" id="btnRegla">Crear regla…</button>
+        <button class="suave" id="btnIgnorar">Ignorar</button>
+        <button class="suave" id="btnDespejar">Devolver a bandeja</button>
+        <button class="suave" id="btnLimpiar">Quitar selección</button>
       </div>
-      <div id="bloqueReparto">
-        <label for="cReparto">En el 50/30/20 cuenta como</label>
-        <select id="cReparto">
-          <option value="variable">Gasto variable</option>
-          <option value="fijo">Gasto fijo</option>
-        </select>
+
+      <div id="tabla"></div>
+    </main>
+
+    <dialog id="dlgSubir">
+      <div class="dlg">
+        <div class="avisoDlg"></div>
+        <h2>Subir extracto</h2>
+        <p>
+          El .xls del banco o el .csv de PayPal. Se comprueba solo: lo ya
+          importado no se duplica.
+        </p>
+        <div
+          id="resumenSubida"
+          style="font-size: 13px; color: var(--apagado); min-height: 20px"
+        ></div>
+        <div class="acciones">
+          <button class="suave" id="btnSubirCancelar">Cerrar</button>
+          <button id="btnSubirElegir">Elegir fichero…</button>
+        </div>
       </div>
-    </div>
-    <div class="acciones">
-      <button class="suave" id="btnCatCancelar">Cancelar</button>
-      <button id="btnCatGuardar">Crear categoría</button>
-    </div>
-  </div>
-</dialog>
+    </dialog>
 
-<dialog id="dlgLista" class="ancho">
-  <div class="dlg">
-    <div class="avisoDlg"></div>
-    <h2>Categorías</h2>
-    <p>Las que están en uso no se pueden borrar; desactívalas y dejarán de aparecer al clasificar.</p>
-    <div class="barra">
-      <input type="search" id="buscaCat" placeholder="Filtrar…">
-      <button id="btnNuevaCat">Nueva categoría</button>
-    </div>
-    <div class="scroll"><table class="tablaCat" id="tablaCat"></table></div>
-    <div class="acciones">
-      <button class="suave" id="btnCerrarLista">Cerrar</button>
-    </div>
-  </div>
-</dialog>
+    <dialog id="dlgCat">
+      <div class="dlg">
+        <div class="avisoDlg"></div>
+        <h2 id="tituloCat">Nueva categoría</h2>
+        <p>
+          La categoría agrupa; la subcategoría es lo que eliges al clasificar.
+        </p>
+        <div class="campos">
+          <div>
+            <label for="cCategoria">Categoría</label>
+            <input
+              id="cCategoria"
+              list="listaCats"
+              autocomplete="off"
+              placeholder="VIVIENDA"
+            />
+            <datalist id="listaCats"></datalist>
+          </div>
+          <div>
+            <label for="cSub">Subcategoría</label>
+            <input id="cSub" autocomplete="off" placeholder="Trastero" />
+          </div>
+          <div>
+            <label for="cTipo">Tipo</label>
+            <select id="cTipo">
+              <option value="gasto">Gasto</option>
+              <option value="ingreso">Ingreso</option>
+              <option value="ahorro">Ahorro</option>
+              <option value="inversion">Inversión</option>
+              <option value="traspaso">Traspaso (fuera del cómputo)</option>
+            </select>
+          </div>
+          <div id="bloqueReparto">
+            <label for="cReparto">En el 50/30/20 cuenta como</label>
+            <select id="cReparto">
+              <option value="variable">Gasto variable</option>
+              <option value="fijo">Gasto fijo</option>
+            </select>
+          </div>
+        </div>
+        <div class="acciones">
+          <button class="suave" id="btnCatCancelar">Cancelar</button>
+          <button id="btnCatGuardar">Crear categoría</button>
+        </div>
+      </div>
+    </dialog>
 
-<dialog id="dlgRegla">
-  <div class="dlg">
-    <div class="avisoDlg"></div>
-    <h2>Crear regla</h2>
-    <p>Los movimientos cuyo concepto contenga este texto se clasificarán solos, ahora y en las próximas importaciones.</p>
-    <label for="patron">Texto a buscar</label>
-    <input id="patron" type="text" autocomplete="off">
-    <div class="impacto" id="impacto"></div>
-    <label>Categoría</label>
-    <div class="combo" id="catRegla"></div>
-    <div class="acciones">
-      <button class="suave" id="btnCancelar">Cancelar</button>
-      <button id="btnGuardarRegla">Crear y aplicar</button>
-    </div>
-  </div>
-</dialog>
+    <dialog id="dlgLista" class="ancho">
+      <div class="dlg">
+        <div class="avisoDlg"></div>
+        <h2>Categorías</h2>
+        <p>
+          Las que están en uso no se pueden borrar; desactívalas y dejarán de
+          aparecer al clasificar.
+        </p>
+        <div class="barra">
+          <input type="search" id="buscaCat" placeholder="Filtrar…" />
+          <button id="btnNuevaCat">Nueva categoría</button>
+        </div>
+        <div class="scroll"><table class="tablaCat" id="tablaCat"></table></div>
+        <div class="acciones">
+          <button class="suave" id="btnCerrarLista">Cerrar</button>
+        </div>
+      </div>
+    </dialog>
 
-<script>
-const $ = (s) => document.querySelector(s);
-const eur = (n) => Number(n).toLocaleString('es-ES',
-  { style: 'currency', currency: 'EUR', minimumFractionDigits: 2 });
-const dia = (s) => new Date(s).toLocaleDateString('es-ES',
-  { day: '2-digit', month: 'short', year: '2-digit' });
+    <dialog id="dlgRegla">
+      <div class="dlg">
+        <div class="avisoDlg"></div>
+        <h2>Crear regla</h2>
+        <p>
+          Los movimientos cuyo concepto contenga este texto se clasificarán
+          solos, ahora y en las próximas importaciones.
+        </p>
+        <label for="patron">Texto a buscar</label>
+        <input id="patron" type="text" autocomplete="off" />
+        <div class="impacto" id="impacto"></div>
+        <label>Categoría</label>
+        <div class="combo" id="catRegla"></div>
+        <div class="acciones">
+          <button class="suave" id="btnCancelar">Cancelar</button>
+          <button id="btnGuardarRegla">Crear y aplicar</button>
+        </div>
+      </div>
+    </dialog>
 
-let categorias = [];
-let filas = [];
-let totalFiltrado = 0, sumaFiltrada = 0;
-const sel = new Set();
+    <script>
+      const $ = (s) => document.querySelector(s);
+      const eur = (n) =>
+        Number(n).toLocaleString("es-ES", {
+          style: "currency",
+          currency: "EUR",
+          minimumFractionDigits: 2,
+        });
+      const dia = (s) =>
+        new Date(s).toLocaleDateString("es-ES", {
+          day: "2-digit",
+          month: "short",
+          year: "2-digit",
+        });
 
-const estado = {
-  orden: 'importe', dir: 'desc',
-  estado: 'pendiente',
-  q: '', origen: '', min: '', max: '', fechaDesde: '',
-  pagina: 0, porPagina: 100,
-  foco: null,
-};
+      let categorias = [];
+      let filas = [];
+      let totalFiltrado = 0,
+        sumaFiltrada = 0;
+      const sel = new Set();
 
-/** Qué filtros hay puestos ahora mismo. La ordenación no cuenta. */
-function filtrosActivos() {
-  return ['q', 'origen', 'min', 'max', 'fechaDesde']
-    .filter((k) => estado[k] !== '' && estado[k] !== null && estado[k] !== undefined);
-}
-const hayFiltros = () => filtrosActivos().length > 0;
+      const estado = {
+        orden: "importe",
+        dir: "desc",
+        estado: "pendiente",
+        q: "",
+        origen: "",
+        min: "",
+        max: "",
+        fechaDesde: "",
+        pagina: 0,
+        porPagina: 100,
+      };
 
-function limpiarFiltros() {
-  Object.assign(estado, { q: '', origen: '', min: '', max: '', fechaDesde: '', pagina: 0 });
-  cargar();
-}
+      /** Qué filtros hay puestos ahora mismo. La ordenación no cuenta. */
+      function filtrosActivos() {
+        return ["q", "origen", "min", "max", "fechaDesde"].filter(
+          (k) =>
+            estado[k] !== "" && estado[k] !== null && estado[k] !== undefined,
+        );
+      }
+      const hayFiltros = () => filtrosActivos().length > 0;
 
-function parametros() {
-  const p = new URLSearchParams({
-    orden: estado.orden, dir: estado.dir,
-    limite: estado.porPagina, pagina: estado.pagina,
-  });
-  if (estado.q) p.set('q', estado.q);
-  if (estado.origen) p.set('origen', estado.origen);
-  if (estado.min !== '') p.set('min', estado.min);
-  if (estado.max !== '') p.set('max', estado.max);
-  if (estado.fechaDesde) p.set('fechaDesde', estado.fechaDesde);
-  p.set('estado', estado.estado);
-  return p.toString();
-}
+      function limpiarFiltros() {
+        Object.assign(estado, {
+          q: "",
+          origen: "",
+          min: "",
+          max: "",
+          fechaDesde: "",
+          pagina: 0,
+        });
+        cargar();
+      }
 
-async function api(url, opciones) {
-  let r;
-  try { r = await fetch(url, opciones); }
-  catch { throw new Error('No hay conexión con el servidor. ¿Está arrancado?'); }
+      function parametros() {
+        const p = new URLSearchParams({
+          orden: estado.orden,
+          dir: estado.dir,
+          limite: estado.porPagina,
+          pagina: estado.pagina,
+        });
+        if (estado.q) p.set("q", estado.q);
+        if (estado.origen) p.set("origen", estado.origen);
+        if (estado.min !== "") p.set("min", estado.min);
+        if (estado.max !== "") p.set("max", estado.max);
+        if (estado.fechaDesde) p.set("fechaDesde", estado.fechaDesde);
+        p.set("estado", estado.estado);
+        return p.toString();
+      }
 
-  const texto = await r.text();
-  let cuerpo = null;
-  try { cuerpo = JSON.parse(texto); } catch { /* no era JSON */ }
+      async function api(url, opciones) {
+        let r;
+        try {
+          r = await fetch(url, opciones);
+        } catch {
+          throw new Error("No hay conexión con el servidor. ¿Está arrancado?");
+        }
 
-  if (!r.ok) {
-    // 404 sin JSON = ruta que no existe: casi siempre, servidor sin reiniciar.
-    if (r.status === 404 && !cuerpo) {
-      throw new Error(`La ruta ${url} no existe en el servidor. Reinícialo: Ctrl+C y node bin/servidor.js`);
-    }
-    throw new Error((cuerpo && cuerpo.error) || `Error ${r.status} del servidor`);
-  }
-  if (cuerpo === null) throw new Error('El servidor devolvió una respuesta ilegible.');
-  return cuerpo;
-}
+        const texto = await r.text();
+        let cuerpo = null;
+        try {
+          cuerpo = JSON.parse(texto);
+        } catch {
+          /* no era JSON */
+        }
 
-function avisar(texto, mal) {
-  // Si hay un diálogo abierto, el aviso va dentro: fuera queda tapado por el fondo.
-  const abierto = document.querySelector('dialog[open]');
-  const destino = abierto ? abierto.querySelector('.avisoDlg') : $('#aviso');
-  if (!destino) return;
-  destino.innerHTML = texto ? `<div class="aviso ${mal ? 'mal' : ''}">${texto}</div>` : '';
-  if (texto && !mal) setTimeout(() => (destino.innerHTML = ''), 4000);
-}
+        if (!r.ok) {
+          // 404 sin JSON = ruta que no existe: casi siempre, servidor sin reiniciar.
+          if (r.status === 404 && !cuerpo) {
+            throw new Error(
+              `La ruta ${url} no existe en el servidor. Reinícialo: Ctrl+C y node bin/servidor.js`,
+            );
+          }
+          throw new Error(
+            (cuerpo && cuerpo.error) || `Error ${r.status} del servidor`,
+          );
+        }
+        if (cuerpo === null)
+          throw new Error("El servidor devolvió una respuesta ilegible.");
+        return cuerpo;
+      }
 
-/** Sin acentos y en minúsculas, para que "ninas" encuentre "NIÑAS". */
-const plano = (s) => String(s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+      function avisar(texto, mal) {
+        // Si hay un diálogo abierto, el aviso va dentro: fuera queda tapado por el fondo.
+        const abierto = document.querySelector("dialog[open]");
+        const destino = abierto
+          ? abierto.querySelector(".avisoDlg")
+          : $("#aviso");
+        if (!destino) return;
+        destino.innerHTML = texto
+          ? `<div class="aviso ${mal ? "mal" : ""}">${texto}</div>`
+          : "";
+        if (texto && !mal) setTimeout(() => (destino.innerHTML = ""), 4000);
+      }
 
-const escapar = (s) => s.replace(/[&<>"]/g, (c) =>
-  ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+      /** Sin acentos y en minúsculas, para que "ninas" encuentre "NIÑAS". */
+      const plano = (s) =>
+        String(s)
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .toLowerCase();
 
-/**
- * Combobox sobre las categorías. Filtra por trozos sueltos: "alim gen"
- * encuentra "ALIMENTACIÓN · General" sin importar el orden ni los acentos.
- * Devuelve { valor, fijar, limpiar, alElegir }.
- */
-function crearCombo(contenedor, placeholder) {
-  const caja = typeof contenedor === 'string' ? $(contenedor) : contenedor;
-  caja.innerHTML =
-    `<input type="text" role="combobox" aria-expanded="false" aria-autocomplete="list"
+      const escapar = (s) =>
+        s.replace(
+          /[&<>"]/g,
+          (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c],
+        );
+
+      /**
+       * Combobox sobre las categorías. Filtra por trozos sueltos: "alim gen"
+       * encuentra "ALIMENTACIÓN · General" sin importar el orden ni los acentos.
+       * Devuelve { valor, fijar, limpiar, alElegir }.
+       */
+      function crearCombo(contenedor, placeholder) {
+        const caja =
+          typeof contenedor === "string" ? $(contenedor) : contenedor;
+        caja.innerHTML = `<input type="text" role="combobox" aria-expanded="false" aria-autocomplete="list"
             placeholder="${placeholder}" autocomplete="off"><ul></ul>`;
 
-  const campo = caja.querySelector('input');
-  const lista = caja.querySelector('ul');
-  let elegida = null, visibles = [], activa = -1;
+        const campo = caja.querySelector("input");
+        const lista = caja.querySelector("ul");
+        let elegida = null,
+          visibles = [],
+          activa = -1;
 
-  const etiqueta = (c) => `${c.categoria} · ${c.subcategoria}`;
+        const etiqueta = (c) => `${c.categoria} · ${c.subcategoria}`;
 
-  function filtrar(texto) {
-    const partes = plano(texto).split(/\s+/).filter(Boolean);
-    if (!partes.length) return categorias.slice(0, 60);
-    return categorias
-      .filter((c) => { const h = plano(etiqueta(c)); return partes.every((p) => h.includes(p)); })
-      // Antes lo que empieza por lo escrito: suele ser lo que se busca.
-      .sort((a, b) => plano(a.subcategoria).indexOf(partes[0])
-                    - plano(b.subcategoria).indexOf(partes[0]))
-      .slice(0, 60);
-  }
+        function filtrar(texto) {
+          const partes = plano(texto).split(/\s+/).filter(Boolean);
+          if (!partes.length) return categorias.slice(0, 60);
+          return (
+            categorias
+              .filter((c) => {
+                const h = plano(etiqueta(c));
+                return partes.every((p) => h.includes(p));
+              })
+              // Antes lo que empieza por lo escrito: suele ser lo que se busca.
+              .sort(
+                (a, b) =>
+                  plano(a.subcategoria).indexOf(partes[0]) -
+                  plano(b.subcategoria).indexOf(partes[0]),
+              )
+              .slice(0, 60)
+          );
+        }
 
-  function resaltar(txt, partes) {
-    let salida = escapar(txt);
-    partes.forEach((p) => {
-      const i = plano(salida).indexOf(p);
-      if (i === -1) return;
-      salida = salida.slice(0, i) + '<mark>' + salida.slice(i, i + p.length) + '</mark>'
-             + salida.slice(i + p.length);
-    });
-    return salida;
-  }
+        function resaltar(txt, partes) {
+          let salida = escapar(txt);
+          partes.forEach((p) => {
+            const i = plano(salida).indexOf(p);
+            if (i === -1) return;
+            salida =
+              salida.slice(0, i) +
+              "<mark>" +
+              salida.slice(i, i + p.length) +
+              "</mark>" +
+              salida.slice(i + p.length);
+          });
+          return salida;
+        }
 
-  function pintar() {
-    const partes = plano(campo.value).split(/\s+/).filter(Boolean);
-    const escrito = campo.value.trim();
-    // Si no existe, se ofrece crearla sin salir de aquí: es donde surge la falta.
-    const crear = escrito.length >= 2
-      ? `<li class="crear activa" data-crear="1">Crear «${escapar(escrito)}»…</li>` : '';
+        function pintar() {
+          const partes = plano(campo.value).split(/\s+/).filter(Boolean);
+          const escrito = campo.value.trim();
+          // Si no existe, se ofrece crearla sin salir de aquí: es donde surge la falta.
+          const crear =
+            escrito.length >= 2
+              ? `<li class="crear activa" data-crear="1">Crear «${escapar(escrito)}»…</li>`
+              : "";
 
-    if (!visibles.length) {
-      lista.innerHTML = crear || '<li class="nada">Escribe para buscar o crear</li>';
-    } else {
-      lista.innerHTML = visibles.map((c, i) =>
-        `<li data-i="${i}" class="${i === activa ? 'activa' : ''}">
+          if (!visibles.length) {
+            lista.innerHTML =
+              crear || '<li class="nada">Escribe para buscar o crear</li>';
+          } else {
+            lista.innerHTML =
+              visibles
+                .map(
+                  (c, i) =>
+                    `<li data-i="${i}" class="${i === activa ? "activa" : ""}">
            ${resaltar(c.subcategoria, partes)}
-           <span class="cat">· ${escapar(c.categoria)}</span></li>`).join('')
-        + (escrito.length >= 2
-            ? `<li class="crear" data-crear="1">Crear «${escapar(escrito)}»…</li>` : '');
-    }
-    lista.querySelectorAll('li[data-i]').forEach((li) => {
-      li.onmousedown = (e) => { e.preventDefault(); elegir(visibles[+li.dataset.i]); };
-    });
-    lista.querySelectorAll('li[data-crear]').forEach((li) => {
-      li.onmousedown = (e) => { e.preventDefault(); cerrar(); nuevaCategoria(escrito, api2); };
-    });
-  }
+           <span class="cat">· ${escapar(c.categoria)}</span></li>`,
+                )
+                .join("") +
+              (escrito.length >= 2
+                ? `<li class="crear" data-crear="1">Crear «${escapar(escrito)}»…</li>`
+                : "");
+          }
+          lista.querySelectorAll("li[data-i]").forEach((li) => {
+            li.onmousedown = (e) => {
+              e.preventDefault();
+              elegir(visibles[+li.dataset.i]);
+            };
+          });
+          lista.querySelectorAll("li[data-crear]").forEach((li) => {
+            li.onmousedown = (e) => {
+              e.preventDefault();
+              cerrar();
+              nuevaCategoria(escrito, api2);
+            };
+          });
+        }
 
-  function abrir() {
-    visibles = filtrar(campo.value);
-    activa = visibles.length ? 0 : -1;
-    lista.classList.add('abierta');
-    campo.setAttribute('aria-expanded', 'true');
-    pintar();
-  }
+        function abrir() {
+          visibles = filtrar(campo.value);
+          activa = visibles.length ? 0 : -1;
+          lista.classList.add("abierta");
+          campo.setAttribute("aria-expanded", "true");
+          pintar();
+        }
 
-  function cerrar() {
-    lista.classList.remove('abierta');
-    campo.setAttribute('aria-expanded', 'false');
-  }
+        function cerrar() {
+          lista.classList.remove("abierta");
+          campo.setAttribute("aria-expanded", "false");
+        }
 
-  function elegir(c) {
-    elegida = c;
-    campo.value = etiqueta(c);
-    campo.classList.add('elegida');
-    cerrar();
-    if (api2.alElegir) api2.alElegir(c);
-  }
+        function elegir(c) {
+          elegida = c;
+          campo.value = etiqueta(c);
+          campo.classList.add("elegida");
+          cerrar();
+          if (api2.alElegir) api2.alElegir(c);
+        }
 
-  campo.oninput = () => { elegida = null; campo.classList.remove('elegida'); abrir(); };
-  campo.onfocus = abrir;
-  campo.onblur = () => {
-    cerrar();
-    // Si se escribió algo sin elegir, se limpia: mejor vacío que a medias.
-    if (!elegida) { campo.value = ''; campo.classList.remove('elegida'); }
-  };
+        campo.oninput = () => {
+          elegida = null;
+          campo.classList.remove("elegida");
+          abrir();
+        };
+        campo.onfocus = abrir;
+        campo.onblur = () => {
+          cerrar();
+          // Si se escribió algo sin elegir, se limpia: mejor vacío que a medias.
+          if (!elegida) {
+            campo.value = "";
+            campo.classList.remove("elegida");
+          }
+        };
 
-  campo.onkeydown = (e) => {
-    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-      e.preventDefault();
-      if (!lista.classList.contains('abierta')) return abrir();
-      activa = Math.max(0, Math.min(visibles.length - 1,
-        activa + (e.key === 'ArrowDown' ? 1 : -1)));
-      pintar();
-      lista.querySelector('li.activa')?.scrollIntoView({ block: 'nearest' });
-    } else if (e.key === 'Enter') {
-      if (activa >= 0 && visibles[activa]) { e.preventDefault(); elegir(visibles[activa]); }
-    } else if (e.key === 'Escape') {
-      cerrar(); campo.blur();
-    }
-  };
+        campo.onkeydown = (e) => {
+          if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+            e.preventDefault();
+            if (!lista.classList.contains("abierta")) return abrir();
+            activa = Math.max(
+              0,
+              Math.min(
+                visibles.length - 1,
+                activa + (e.key === "ArrowDown" ? 1 : -1),
+              ),
+            );
+            pintar();
+            lista
+              .querySelector("li.activa")
+              ?.scrollIntoView({ block: "nearest" });
+          } else if (e.key === "Enter") {
+            if (activa >= 0 && visibles[activa]) {
+              e.preventDefault();
+              elegir(visibles[activa]);
+            }
+          } else if (e.key === "Escape") {
+            cerrar();
+            campo.blur();
+          }
+        };
 
-  const api2 = {
-    valor: () => (elegida ? elegida.id : null),
-    fijar(id) {
-      const c = categorias.find((x) => x.id === Number(id));
-      if (c) elegir(c);
-    },
-    limpiar() {
-      elegida = null; campo.value = ''; campo.classList.remove('elegida');
-    },
-    alElegir: null,
-  };
-  return api2;
-}
+        const api2 = {
+          valor: () => (elegida ? elegida.id : null),
+          fijar(id) {
+            const c = categorias.find((x) => x.id === Number(id));
+            if (c) elegir(c);
+          },
+          limpiar() {
+            elegida = null;
+            campo.value = "";
+            campo.classList.remove("elegida");
+          },
+          alElegir: null,
+        };
+        return api2;
+      }
 
-let comboLote, comboRegla;
+      let comboLote, comboRegla;
 
-const COLUMNAS = [
-  { id: 'fecha',     titulo: 'Fecha',     ancho: '96px' },
-  { id: 'concepto',  titulo: 'Concepto',  ancho: '' },
-  { id: 'categoria', titulo: 'Categoría', ancho: '200px' },
-  { id: 'origen',    titulo: 'Origen',    ancho: '74px' },
-  { id: 'importe',   titulo: 'Importe',   ancho: '124px', num: true },
-];
+      const COLUMNAS = [
+        { id: "fecha", titulo: "Fecha", ancho: "96px" },
+        { id: "concepto", titulo: "Concepto", ancho: "" },
+        { id: "categoria", titulo: "Categoría", ancho: "200px" },
+        { id: "origen", titulo: "Origen", ancho: "74px" },
+        { id: "importe", titulo: "Importe", ancho: "124px", num: true },
+      ];
 
-const TIPO_ETQ = { ingreso: 'ingreso', gasto: 'gasto', ahorro: 'ahorro',
-                   inversion: 'inversión', traspaso: 'traspaso' };
+      const TIPO_ETQ = {
+        ingreso: "ingreso",
+        gasto: "gasto",
+        ahorro: "ahorro",
+        inversion: "inversión",
+        traspaso: "traspaso",
+      };
 
-/** Categoría + subcategoría + tipo, o el hueco si aún no tiene. */
-function celdaCategoria(m) {
-  if (!m.categoria_id) {
-    return m.estado === 'ignorado'
-      ? '<span class="sinCat">ignorado</span>'
-      : '<span class="sinCat">— sin clasificar</span>';
-  }
-  const marca = m.clasif_origen === 'manual' ? ' title="clasificado a mano"' : '';
-  return `<span class="sub"${marca}>${escapar(m.subcategoria)}</span>
+      /** Categoría + subcategoría + tipo, o el hueco si aún no tiene. */
+      function celdaCategoria(m) {
+        if (!m.categoria_id) {
+          return m.estado === "ignorado"
+            ? '<span class="sinCat">ignorado</span>'
+            : '<span class="sinCat">— sin clasificar</span>';
+        }
+        const marca =
+          m.clasif_origen === "manual" ? ' title="clasificado a mano"' : "";
+        return `<span class="sub"${marca}>${escapar(m.subcategoria)}</span>
           <span class="pastilla t-${m.tipo}">${TIPO_ETQ[m.tipo] || m.tipo}</span>
           <br><span class="catNom">${escapar(m.categoria)}</span>`;
-}
+      }
 
-function pintarCabecera() {
-  const th = COLUMNAS.map((c) => {
-    const act = estado.orden === c.id;
-    const flecha = act && estado.dir === 'asc' ? '▲' : '▼';
-    return `<th style="${c.ancho ? 'width:' + c.ancho : ''}"
-                class="${c.num ? 'num ' : ''}${act ? 'activa' : ''}">
+      function pintarCabecera() {
+        const th = COLUMNAS.map((c) => {
+          const act = estado.orden === c.id;
+          const flecha = act && estado.dir === "asc" ? "▲" : "▼";
+          return `<th style="${c.ancho ? "width:" + c.ancho : ""}"
+                class="${c.num ? "num " : ""}${act ? "activa" : ""}">
       <button class="orden" data-col="${c.id}"
-              aria-sort="${act ? (estado.dir === 'asc' ? 'ascending' : 'descending') : 'none'}">
+              aria-sort="${act ? (estado.dir === "asc" ? "ascending" : "descending") : "none"}">
         ${c.titulo}<span class="flecha">${flecha}</span></button></th>`;
-  }).join('');
+        }).join("");
 
-  return `<thead>
+        return `<thead>
     <tr>
       <th style="width:36px"><span style="padding:9px 12px;display:block">
         <input type="checkbox" id="todos"></span></th>
@@ -603,7 +1114,7 @@ function pintarCabecera() {
     <tr class="filtros">
       <th style="text-align:center">
         <button class="aspa" id="fLimpiar" title="Quitar todos los filtros"
-                ${hayFiltros() ? '' : 'disabled'}>&times;</button>
+                ${hayFiltros() ? "" : "disabled"}>&times;</button>
       </th>
       <th><div class="rango">
         <input type="date" id="fDesde" value="${estado.fechaDesde}" title="Desde">
@@ -611,15 +1122,15 @@ function pintarCabecera() {
       <th><input type="search" id="fTexto" value="${escapar(estado.q)}"
                  placeholder="Filtrar concepto o categoría…"></th>
       <th><select id="fEstado">
-        <option value="pendiente"${estado.estado === 'pendiente' ? ' selected' : ''}>Por clasificar</option>
-        <option value="ok"${estado.estado === 'ok' ? ' selected' : ''}>Clasificados</option>
-        <option value="ignorado"${estado.estado === 'ignorado' ? ' selected' : ''}>Ignorados</option>
-        <option value="todos"${estado.estado === 'todos' ? ' selected' : ''}>Todos</option>
+        <option value="pendiente"${estado.estado === "pendiente" ? " selected" : ""}>Por clasificar</option>
+        <option value="ok"${estado.estado === "ok" ? " selected" : ""}>Clasificados</option>
+        <option value="ignorado"${estado.estado === "ignorado" ? " selected" : ""}>Ignorados</option>
+        <option value="todos"${estado.estado === "todos" ? " selected" : ""}>Todos</option>
       </select></th>
       <th><select id="fOrigen">
         <option value="">Todos</option>
-        <option value="banco"${estado.origen === 'banco' ? ' selected' : ''}>Banco</option>
-        <option value="paypal"${estado.origen === 'paypal' ? ' selected' : ''}>PayPal</option>
+        <option value="banco"${estado.origen === "banco" ? " selected" : ""}>Banco</option>
+        <option value="paypal"${estado.origen === "paypal" ? " selected" : ""}>PayPal</option>
       </select></th>
       <th><div class="rango">
         <input type="number" id="fMin" value="${estado.min}" placeholder="mín" min="0">
@@ -627,473 +1138,629 @@ function pintarCabecera() {
       </div></th>
     </tr>
   </thead>`;
-}
+      }
 
-function pintarTabla() {
-  if (!filas.length) {
-    const filtrando = estado.q || estado.origen || estado.min || estado.max || estado.fechaDesde;
-    $('#tabla').innerHTML = `<div class="marco"><div class="vacio">
-      <b>${filtrando ? 'Nada coincide' : 'Bandeja vacía'}</b>
-      ${filtrando ? 'Prueba a quitar algún filtro.' : 'Todo lo importado tiene categoría.'}
+      function pintarTabla() {
+        // Se captura ANTES de tocar el DOM: reemplazar #tabla.innerHTML destruye
+        // el input actual, y el navegador le dispara un blur automático al
+        // quitarlo. Si esa lectura se hiciera después (o dependiera de un
+        // "onblur" guardado de la vez anterior), llegaría siempre tarde y el
+        // campo perdería el foco a partir del segundo repintado en adelante.
+        const campoFiltro = document.getElementById("fTexto");
+        const foco =
+          campoFiltro && document.activeElement === campoFiltro
+            ? {
+                inicio: campoFiltro.selectionStart,
+                fin: campoFiltro.selectionEnd,
+              }
+            : null;
+
+        if (!filas.length) {
+          const filtrando =
+            estado.q ||
+            estado.origen ||
+            estado.min ||
+            estado.max ||
+            estado.fechaDesde;
+          $("#tabla").innerHTML = `<div class="marco"><div class="vacio">
+      <b>${filtrando ? "Nada coincide" : "Bandeja vacía"}</b>
+      ${filtrando ? "Prueba a quitar algún filtro." : "Todo lo importado tiene categoría."}
     </div></div>`;
-    if (filtrando) conectarFiltros();
-    return;
-  }
+          if (filtrando) conectarFiltros(foco);
+          return;
+        }
 
-  const paginas = Math.max(1, Math.ceil(totalFiltrado / estado.porPagina));
-  const primero = estado.pagina * estado.porPagina + 1;
-  const ultimo = Math.min(primero + filas.length - 1, totalFiltrado);
-  const todosVisiblesMarcados = filas.every((m) => sel.has(m.id));
+        const paginas = Math.max(
+          1,
+          Math.ceil(totalFiltrado / estado.porPagina),
+        );
+        const primero = estado.pagina * estado.porPagina + 1;
+        const ultimo = Math.min(primero + filas.length - 1, totalFiltrado);
+        const todosVisiblesMarcados = filas.every((m) => sel.has(m.id));
 
-  $('#tabla').innerHTML = `<div class="marco">
-    ${todosVisiblesMarcados && totalFiltrado > filas.length ? `
+        $("#tabla").innerHTML = `<div class="marco">
+    ${
+      todosVisiblesMarcados && totalFiltrado > filas.length
+        ? `
       <div class="todos-coinciden">
         Seleccionados los ${filas.length} de esta página.
         <button class="enlace" id="selTodos">Seleccionar los ${totalFiltrado} que coinciden</button>
-      </div>` : ''}
+      </div>`
+        : ""
+    }
     <table>
       ${pintarCabecera()}
-      <tbody>${filas.map((m) => `
-        <tr data-id="${m.id}" class="${sel.has(m.id) ? 'marcada' : ''}">
-          <td><input type="checkbox" ${sel.has(m.id) ? 'checked' : ''}></td>
+      <tbody>${filas
+        .map(
+          (m) => `
+        <tr data-id="${m.id}" class="${sel.has(m.id) ? "marcada" : ""}">
+          <td><input type="checkbox" ${sel.has(m.id) ? "checked" : ""}></td>
           <td class="cifra">${dia(m.fecha)}</td>
           <td class="concepto" title="${escapar(m.concepto)}">${escapar(m.concepto)}</td>
           <td class="cat">${celdaCategoria(m)}</td>
           <td class="fuente">${m.origen}</td>
-          <td class="num cifra ${m.importe < 0 ? 'negativo' : ''}">${eur(m.importe)}</td>
-        </tr>`).join('')}</tbody>
+          <td class="num cifra ${m.importe < 0 ? "negativo" : ""}">${eur(m.importe)}</td>
+        </tr>`,
+        )
+        .join("")}</tbody>
     </table>
     <div class="pie">
       <span>${primero}–${ultimo} de <b class="cifra">${totalFiltrado}</b></span>
       <span>·</span>
       <span>suma <b class="cifra">${eur(sumaFiltrada)}</b></span>
       <div class="paginas">
-        <button class="suave" id="pAnt" ${estado.pagina === 0 ? 'disabled' : ''}>Anterior</button>
+        <button class="suave" id="pAnt" ${estado.pagina === 0 ? "disabled" : ""}>Anterior</button>
         <span class="cifra">${estado.pagina + 1} / ${paginas}</span>
-        <button class="suave" id="pSig" ${estado.pagina >= paginas - 1 ? 'disabled' : ''}>Siguiente</button>
+        <button class="suave" id="pSig" ${estado.pagina >= paginas - 1 ? "disabled" : ""}>Siguiente</button>
       </div>
     </div>
   </div>`;
 
-  conectarFiltros();
-  medirCabecera();
+        conectarFiltros(foco);
+        medirCabecera();
 
-  $('#todos').onchange = (e) => {
-    filas.forEach((m) => (e.target.checked ? sel.add(m.id) : sel.delete(m.id)));
-    pintarTabla(); pintarLote();
-  };
-  $('#todos').checked = todosVisiblesMarcados;
+        $("#todos").onchange = (e) => {
+          filas.forEach((m) =>
+            e.target.checked ? sel.add(m.id) : sel.delete(m.id),
+          );
+          pintarTabla();
+          pintarLote();
+        };
+        $("#todos").checked = todosVisiblesMarcados;
 
-  document.querySelectorAll('.orden').forEach((b) => {
-    b.onclick = () => {
-      const col = b.dataset.col;
-      // Volver a pulsar la misma columna invierte; una nueva empieza descendente.
-      if (estado.orden === col) estado.dir = estado.dir === 'asc' ? 'desc' : 'asc';
-      else { estado.orden = col; estado.dir = col === 'concepto' ? 'asc' : 'desc'; }
-      estado.pagina = 0;
-      cargar();
-    };
-  });
+        document.querySelectorAll(".orden").forEach((b) => {
+          b.onclick = () => {
+            const col = b.dataset.col;
+            // Volver a pulsar la misma columna invierte; una nueva empieza descendente.
+            if (estado.orden === col)
+              estado.dir = estado.dir === "asc" ? "desc" : "asc";
+            else {
+              estado.orden = col;
+              estado.dir = col === "concepto" ? "asc" : "desc";
+            }
+            estado.pagina = 0;
+            cargar();
+          };
+        });
 
-  document.querySelectorAll('tbody tr').forEach((tr) => {
-    tr.onclick = (e) => {
-      const id = Number(tr.dataset.id);
-      const caja = tr.querySelector('input');
-      if (e.target !== caja) caja.checked = !caja.checked;
-      caja.checked ? sel.add(id) : sel.delete(id);
-      tr.classList.toggle('marcada', sel.has(id));
-      $('#todos').checked = filas.every((m) => sel.has(m.id));
-      pintarLote();
-    };
-  });
+        document.querySelectorAll("tbody tr").forEach((tr) => {
+          tr.onclick = (e) => {
+            const id = Number(tr.dataset.id);
+            const caja = tr.querySelector("input");
+            if (e.target !== caja) caja.checked = !caja.checked;
+            caja.checked ? sel.add(id) : sel.delete(id);
+            tr.classList.toggle("marcada", sel.has(id));
+            $("#todos").checked = filas.every((m) => sel.has(m.id));
+            pintarLote();
+          };
+        });
 
-  const selTodos = $('#selTodos');
-  if (selTodos) selTodos.onclick = async () => {
-    const r = await api('/api/pendientes?ids=1&limite=1&' + parametros());
-    r.ids.forEach((id) => sel.add(id));
-    pintarTabla(); pintarLote();
-  };
+        const selTodos = $("#selTodos");
+        if (selTodos)
+          selTodos.onclick = async () => {
+            const r = await api(
+              "/api/pendientes?ids=1&limite=1&" + parametros(),
+            );
+            r.ids.forEach((id) => sel.add(id));
+            pintarTabla();
+            pintarLote();
+          };
 
-  $('#pAnt').onclick = () => { estado.pagina--; cargar(); };
-  $('#pSig').onclick = () => { estado.pagina++; cargar(); };
-}
+        $("#pAnt").onclick = () => {
+          estado.pagina--;
+          cargar();
+        };
+        $("#pSig").onclick = () => {
+          estado.pagina++;
+          cargar();
+        };
+      }
 
-/** Los filtros se repintan con la tabla, así que hay que reconectarlos. */
-let filtroTimer;
-function conectarFiltros() {
-  const aplicar = (inmediato) => {
-    clearTimeout(filtroTimer);
-    filtroTimer = setTimeout(() => {
-      estado.q = $('#fTexto') ? $('#fTexto').value.trim() : '';
-      estado.origen = $('#fOrigen') ? $('#fOrigen').value : '';
-      estado.min = $('#fMin') ? $('#fMin').value : '';
-      estado.max = $('#fMax') ? $('#fMax').value : '';
-      estado.fechaDesde = $('#fDesde') ? $('#fDesde').value : '';
-      estado.pagina = 0;
-      cargar();
-    }, inmediato ? 0 : 300);
-  };
-  const texto = $('#fTexto');
-  if (texto) {
-    texto.oninput = () => aplicar(false);
-    // Foco donde estaba: si no, escribir en el filtro sería imposible.
-    if (estado.foco === 'fTexto') {
-      texto.focus();
-      texto.setSelectionRange(texto.value.length, texto.value.length);
-    }
-    texto.onfocus = () => (estado.foco = 'fTexto');
-    texto.onblur = () => (estado.foco = null);
-  }
-  const fe = $('#fEstado');
-  if (fe) fe.onchange = () => {
-    estado.estado = fe.value;
-    estado.pagina = 0;
-    sel.clear();
-    cargar();
-  };
+      /** Los filtros se repintan con la tabla, así que hay que reconectarlos. */
+      let filtroTimer;
+      function conectarFiltros(foco) {
+        const aplicar = (inmediato) => {
+          clearTimeout(filtroTimer);
+          filtroTimer = setTimeout(
+            () => {
+              estado.q = $("#fTexto") ? $("#fTexto").value.trim() : "";
+              estado.origen = $("#fOrigen") ? $("#fOrigen").value : "";
+              estado.min = $("#fMin") ? $("#fMin").value : "";
+              estado.max = $("#fMax") ? $("#fMax").value : "";
+              estado.fechaDesde = $("#fDesde") ? $("#fDesde").value : "";
+              estado.pagina = 0;
+              cargar();
+            },
+            inmediato ? 0 : 300,
+          );
+        };
+        const texto = $("#fTexto");
+        if (texto) {
+          texto.oninput = () => aplicar(false);
+          if (foco) {
+            texto.focus();
+            texto.setSelectionRange(foco.inicio, foco.fin);
+          }
+        }
+        const fe = $("#fEstado");
+        if (fe)
+          fe.onchange = () => {
+            estado.estado = fe.value;
+            estado.pagina = 0;
+            sel.clear();
+            cargar();
+          };
 
-  ['fOrigen', 'fMin', 'fMax', 'fDesde'].forEach((id) => {
-    const el = $('#' + id);
-    if (el) el.onchange = () => aplicar(true);
-  });
+        ["fOrigen", "fMin", "fMax", "fDesde"].forEach((id) => {
+          const el = $("#" + id);
+          if (el) el.onchange = () => aplicar(true);
+        });
 
-  const aspa = $('#fLimpiar');
-  if (aspa) aspa.onclick = limpiarFiltros;
+        const aspa = $("#fLimpiar");
+        if (aspa) aspa.onclick = limpiarFiltros;
 
-  // Esc dentro de cualquier filtro los quita todos.
-  document.querySelectorAll('tr.filtros input, tr.filtros select').forEach((el) => {
-    el.onkeydown = (e) => { if (e.key === 'Escape') { e.preventDefault(); limpiarFiltros(); } };
-  });
-}
+        // Esc dentro de cualquier filtro los quita todos.
+        document
+          .querySelectorAll("tr.filtros input, tr.filtros select")
+          .forEach((el) => {
+            el.onkeydown = (e) => {
+              if (e.key === "Escape") {
+                e.preventDefault();
+                limpiarFiltros();
+              }
+            };
+          });
+      }
 
-function pintarLote() {
-  $('#nSel').textContent = sel.size;
-  $('#lote').classList.toggle('visible', sel.size > 0);
-}
+      function pintarLote() {
+        $("#nSel").textContent = sel.size;
+        $("#lote").classList.toggle("visible", sel.size > 0);
+      }
 
-async function cargar() {
-  const [resumen, pend] = await Promise.all([
-    api('/api/resumen'),
-    api('/api/pendientes?' + parametros()),
-  ]);
+      async function cargar() {
+        const [resumen, pend] = await Promise.all([
+          api("/api/resumen"),
+          api("/api/pendientes?" + parametros()),
+        ]);
 
-  const clasificable = resumen.total - resumen.ignorados;
-  $('#mPend').textContent = resumen.pendientes;
-  $('#mImporte').textContent = eur(Math.abs(resumen.importePendiente || 0));
-  $('#mPct').textContent = clasificable
-    ? (resumen.clasificados / clasificable * 100).toFixed(0) + '%' : '–';
+        const clasificable = resumen.total - resumen.ignorados;
+        $("#mPend").textContent = resumen.pendientes;
+        $("#mImporte").textContent = eur(
+          Math.abs(resumen.importePendiente || 0),
+        );
+        $("#mPct").textContent = clasificable
+          ? ((resumen.clasificados / clasificable) * 100).toFixed(0) + "%"
+          : "–";
 
-  filas = pend.filas;
-  totalFiltrado = pend.total;
-  sumaFiltrada = pend.suma;
+        filas = pend.filas;
+        totalFiltrado = pend.total;
+        sumaFiltrada = pend.suma;
 
-  const n = filtrosActivos().length;
-  const bl = $('#btnLimpiarFiltros');
-  bl.textContent = n ? `Quitar ${n} filtro${n === 1 ? '' : 's'}` : 'Sin filtros';
-  bl.disabled = !n;
-  bl.classList.toggle('activo', n > 0);
-  // La selección sobrevive al cambio de página y de orden: se limpia solo
-  // cuando una acción la consume.
-  pintarTabla(); pintarLote();
-}
+        const n = filtrosActivos().length;
+        const bl = $("#btnLimpiarFiltros");
+        bl.textContent = n
+          ? `Quitar ${n} filtro${n === 1 ? "" : "s"}`
+          : "Sin filtros";
+        bl.disabled = !n;
+        bl.classList.toggle("activo", n > 0);
+        // La selección sobrevive al cambio de página y de orden: se limpia solo
+        // cuando una acción la consume.
+        pintarTabla();
+        pintarLote();
+      }
 
-// --- acciones -------------------------------------------------------------
+      // --- acciones -------------------------------------------------------------
 
-$('#btnAsignar').onclick = async () => {
-  const categoriaId = comboLote.valor();
-  if (!categoriaId) return avisar('Elige una categoría primero.', true);
-  const r = await api('/api/clasificar', {
-    method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ ids: [...sel], categoriaId }),
-  });
-  avisar(`${r.actualizados} movimientos clasificados.`);
-  comboLote.limpiar();
-  sel.clear();
-  await cargar();
-};
+      $("#btnAsignar").onclick = async () => {
+        const categoriaId = comboLote.valor();
+        if (!categoriaId) return avisar("Elige una categoría primero.", true);
+        const r = await api("/api/clasificar", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ids: [...sel], categoriaId }),
+        });
+        avisar(`${r.actualizados} movimientos clasificados.`);
+        comboLote.limpiar();
+        sel.clear();
+        await cargar();
+      };
 
-$('#btnIgnorar').onclick = async () => {
-  const r = await api('/api/clasificar', {
-    method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ ids: [...sel], estado: 'ignorado' }),
-  });
-  avisar(`${r.actualizados} movimientos fuera del cómputo.`);
-  sel.clear();
-  await cargar();
-};
+      $("#btnIgnorar").onclick = async () => {
+        const r = await api("/api/clasificar", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ids: [...sel], estado: "ignorado" }),
+        });
+        avisar(`${r.actualizados} movimientos fuera del cómputo.`);
+        sel.clear();
+        await cargar();
+      };
 
-$('#btnDespejar').onclick = async () => {
-  try {
-    const r = await api('/api/despejar', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ids: [...sel] }) });
-    avisar(`${r.actualizados} movimientos devueltos a la bandeja.`);
-    sel.clear();
-    await cargar();
-  } catch (e) { avisar(e.message, true); }
-};
+      $("#btnDespejar").onclick = async () => {
+        try {
+          const r = await api("/api/despejar", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ ids: [...sel] }),
+          });
+          avisar(`${r.actualizados} movimientos devueltos a la bandeja.`);
+          sel.clear();
+          await cargar();
+        } catch (e) {
+          avisar(e.message, true);
+        }
+      };
 
-$('#btnLimpiar').onclick = () => { sel.clear(); pintarTabla(); pintarLote(); };
+      $("#btnLimpiar").onclick = () => {
+        sel.clear();
+        pintarTabla();
+        pintarLote();
+      };
 
-/** Propone como patrón el trozo distintivo del concepto seleccionado. */
-$('#btnRegla').onclick = () => {
-  const primero = filas.find((m) => sel.has(m.id));
-  let sugerido = '';
-  if (primero) {
-    sugerido = primero.concepto
-      .replace(/^(Pago Movil En|Compra Internet En|Compra|Recibo|Transferencia( Inmediata)?( A Favor De)?)\s+/i, '')
-      .split(/[,\d]/)[0].trim().toLowerCase().slice(0, 40);
-  }
-  $('#patron').value = sugerido;
-  if (comboLote.valor()) comboRegla.fijar(comboLote.valor()); else comboRegla.limpiar();
-  $('#dlgRegla').showModal();
-  medirImpacto();
-};
+      /** Propone como patrón el trozo distintivo del concepto seleccionado. */
+      $("#btnRegla").onclick = () => {
+        const primero = filas.find((m) => sel.has(m.id));
+        let sugerido = "";
+        if (primero) {
+          sugerido = primero.concepto
+            .replace(
+              /^(Pago Movil En|Compra Internet En|Compra|Recibo|Transferencia( Inmediata)?( A Favor De)?)\s+/i,
+              "",
+            )
+            .split(/[,\d]/)[0]
+            .trim()
+            .toLowerCase()
+            .slice(0, 40);
+        }
+        $("#patron").value = sugerido;
+        if (comboLote.valor()) comboRegla.fijar(comboLote.valor());
+        else comboRegla.limpiar();
+        $("#dlgRegla").showModal();
+        medirImpacto();
+      };
 
-$('#btnCancelar').onclick = () => $('#dlgRegla').close();
+      $("#btnCancelar").onclick = () => $("#dlgRegla").close();
 
-let temporizador;
-async function medirImpacto() {
-  clearTimeout(temporizador);
-  temporizador = setTimeout(async () => {
-    const p = $('#patron').value.trim();
-    if (p.length < 3) return ($('#impacto').textContent = '');
-    const r = await api('/api/coincidencias?patron=' + encodeURIComponent(p));
-    $('#impacto').textContent = r.n
-      ? `Coincide con ${r.n} movimiento${r.n === 1 ? '' : 's'} por clasificar.`
-      : 'No coincide con ningún pendiente.';
-  }, 250);
-}
-$('#patron').oninput = medirImpacto;
+      let temporizador;
+      async function medirImpacto() {
+        clearTimeout(temporizador);
+        temporizador = setTimeout(async () => {
+          const p = $("#patron").value.trim();
+          if (p.length < 3) return ($("#impacto").textContent = "");
+          const r = await api(
+            "/api/coincidencias?patron=" + encodeURIComponent(p),
+          );
+          $("#impacto").textContent = r.n
+            ? `Coincide con ${r.n} movimiento${r.n === 1 ? "" : "s"} por clasificar.`
+            : "No coincide con ningún pendiente.";
+        }, 250);
+      }
+      $("#patron").oninput = medirImpacto;
 
-$('#btnGuardarRegla').onclick = async () => {
-  try {
-    const r = await api('/api/reglas', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        patron: $('#patron').value,
-        categoriaId: comboRegla.valor(),
-      }),
-    });
-    $('#dlgRegla').close();
-    avisar(`Regla creada. ${r.aplicados} movimientos clasificados.`);
-    sel.clear();
-    await cargar();
-  } catch (e) { avisar(e.message, true); }
-};
+      $("#btnGuardarRegla").onclick = async () => {
+        try {
+          const r = await api("/api/reglas", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              patron: $("#patron").value,
+              categoriaId: comboRegla.valor(),
+            }),
+          });
+          $("#dlgRegla").close();
+          avisar(`Regla creada. ${r.aplicados} movimientos clasificados.`);
+          sel.clear();
+          await cargar();
+        } catch (e) {
+          avisar(e.message, true);
+        }
+      };
 
-$('#btnReclasificar').onclick = async () => {
-  const r = await api('/api/reclasificar', { method: 'POST' });
-  avisar(`${r.reclasificados} movimientos clasificados de ${r.revisados} revisados.`);
-  await cargar();
-};
+      $("#btnReclasificar").onclick = async () => {
+        const r = await api("/api/reclasificar", { method: "POST" });
+        avisar(
+          `${r.reclasificados} movimientos clasificados de ${r.revisados} revisados.`,
+        );
+        await cargar();
+      };
 
-$('#btnLimpiarFiltros').onclick = limpiarFiltros;
+      $("#btnLimpiarFiltros").onclick = limpiarFiltros;
 
+      // --- categorías -----------------------------------------------------------
 
-// --- categorías -----------------------------------------------------------
+      let editandoCat = null; // null = creando; objeto = editando
+      let comboDestino = null; // combo al que devolver la categoría recién creada
 
-let editandoCat = null;   // null = creando; objeto = editando
-let comboDestino = null;  // combo al que devolver la categoría recién creada
+      function pintarDatalist() {
+        const nombres = [...new Set(categorias.map((c) => c.categoria))].sort();
+        $("#listaCats").innerHTML = nombres
+          .map((n) => `<option value="${escapar(n)}">`)
+          .join("");
+      }
 
-function pintarDatalist() {
-  const nombres = [...new Set(categorias.map((c) => c.categoria))].sort();
-  $('#listaCats').innerHTML = nombres.map((n) => `<option value="${escapar(n)}">`).join('');
-}
+      $("#cTipo").onchange = () => {
+        $("#bloqueReparto").style.display =
+          $("#cTipo").value === "gasto" ? "" : "none";
+      };
 
-$('#cTipo').onchange = () => {
-  $('#bloqueReparto').style.display = $('#cTipo').value === 'gasto' ? '' : 'none';
-};
+      /** Abre el diálogo. `texto` viene de lo que se escribió en el combo. */
+      function nuevaCategoria(texto, combo) {
+        editandoCat = null;
+        comboDestino = combo || null;
+        $("#tituloCat").textContent = "Nueva categoría";
+        $("#btnCatGuardar").textContent = "Crear categoría";
 
-/** Abre el diálogo. `texto` viene de lo que se escribió en el combo. */
-function nuevaCategoria(texto, combo) {
-  editandoCat = null;
-  comboDestino = combo || null;
-  $('#tituloCat').textContent = 'Nueva categoría';
-  $('#btnCatGuardar').textContent = 'Crear categoría';
+        // "vivienda trastero" -> categoría VIVIENDA, subcategoría Trastero
+        const partes = (texto || "").trim().split(/\s+/);
+        let cat = "",
+          sub = texto || "";
+        if (partes.length > 1) {
+          const posible = categorias.find(
+            (c) => plano(c.categoria) === plano(partes[0]),
+          );
+          if (posible) {
+            cat = posible.categoria;
+            sub = partes.slice(1).join(" ");
+          }
+        }
+        $("#cCategoria").value = cat;
+        $("#cSub").value = sub.charAt(0).toUpperCase() + sub.slice(1);
+        $("#cTipo").value = "gasto";
+        $("#cReparto").value = "variable";
+        $("#cTipo").onchange();
+        pintarDatalist();
+        $("#dlgCat").showModal();
+        ($("#cCategoria").value ? $("#cSub") : $("#cCategoria")).focus();
+      }
 
-  // "vivienda trastero" -> categoría VIVIENDA, subcategoría Trastero
-  const partes = (texto || '').trim().split(/\s+/);
-  let cat = '', sub = texto || '';
-  if (partes.length > 1) {
-    const posible = categorias.find((c) => plano(c.categoria) === plano(partes[0]));
-    if (posible) { cat = posible.categoria; sub = partes.slice(1).join(' '); }
-  }
-  $('#cCategoria').value = cat;
-  $('#cSub').value = sub.charAt(0).toUpperCase() + sub.slice(1);
-  $('#cTipo').value = 'gasto';
-  $('#cReparto').value = 'variable';
-  $('#cTipo').onchange();
-  pintarDatalist();
-  $('#dlgCat').showModal();
-  ($('#cCategoria').value ? $('#cSub') : $('#cCategoria')).focus();
-}
+      function editarCategoria(c) {
+        editandoCat = c;
+        comboDestino = null;
+        $("#tituloCat").textContent = "Editar categoría";
+        $("#btnCatGuardar").textContent = "Guardar cambios";
+        $("#cCategoria").value = c.categoria;
+        $("#cSub").value = c.subcategoria;
+        $("#cTipo").value = c.tipo;
+        $("#cReparto").value = c.reparto === "fijo" ? "fijo" : "variable";
+        $("#cTipo").onchange();
+        pintarDatalist();
+        $("#dlgCat").showModal();
+        $("#cSub").focus();
+      }
 
-function editarCategoria(c) {
-  editandoCat = c;
-  comboDestino = null;
-  $('#tituloCat').textContent = 'Editar categoría';
-  $('#btnCatGuardar').textContent = 'Guardar cambios';
-  $('#cCategoria').value = c.categoria;
-  $('#cSub').value = c.subcategoria;
-  $('#cTipo').value = c.tipo;
-  $('#cReparto').value = c.reparto === 'fijo' ? 'fijo' : 'variable';
-  $('#cTipo').onchange();
-  pintarDatalist();
-  $('#dlgCat').showModal();
-  $('#cSub').focus();
-}
+      $("#btnCatCancelar").onclick = () => $("#dlgCat").close();
 
-$('#btnCatCancelar').onclick = () => $('#dlgCat').close();
+      $("#btnCatGuardar").onclick = async () => {
+        const cuerpo = {
+          categoria: $("#cCategoria").value.trim(),
+          subcategoria: $("#cSub").value.trim(),
+          tipo: $("#cTipo").value,
+          reparto: $("#cReparto").value,
+        };
+        if (!cuerpo.categoria || !cuerpo.subcategoria) {
+          return avisar("Rellena categoría y subcategoría.", true);
+        }
+        try {
+          const r = editandoCat
+            ? await api("/api/categorias/" + editandoCat.id, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(cuerpo),
+              })
+            : await api("/api/categorias", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(cuerpo),
+              });
 
-$('#btnCatGuardar').onclick = async () => {
-  const cuerpo = {
-    categoria: $('#cCategoria').value.trim(),
-    subcategoria: $('#cSub').value.trim(),
-    tipo: $('#cTipo').value,
-    reparto: $('#cReparto').value,
-  };
-  if (!cuerpo.categoria || !cuerpo.subcategoria) {
-    return avisar('Rellena categoría y subcategoría.', true);
-  }
-  try {
-    const r = editandoCat
-      ? await api('/api/categorias/' + editandoCat.id, {
-          method: 'PATCH', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(cuerpo) })
-      : await api('/api/categorias', {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(cuerpo) });
+          $("#dlgCat").close();
+          categorias = await api("/api/categorias");
 
-    $('#dlgCat').close();
-    categorias = await api('/api/categorias');
+          if (r.id && comboDestino) comboDestino.fijar(r.id);
+          avisar(
+            editandoCat
+              ? "Categoría actualizada."
+              : r.reactivada
+                ? "Existía desactivada y se ha reactivado."
+                : `Creada «${cuerpo.categoria} · ${cuerpo.subcategoria}».`,
+          );
 
-    if (r.id && comboDestino) comboDestino.fijar(r.id);
-    avisar(editandoCat ? 'Categoría actualizada.'
-         : r.reactivada ? 'Existía desactivada y se ha reactivado.'
-         : `Creada «${cuerpo.categoria} · ${cuerpo.subcategoria}».`);
+          if ($("#dlgLista").open) await pintarListaCat();
+        } catch (e) {
+          avisar(e.message, true);
+        }
+      };
 
-    if ($('#dlgLista').open) await pintarListaCat();
-  } catch (e) { avisar(e.message, true); }
-};
+      async function pintarListaCat() {
+        const todas = await api("/api/categorias?todas=1");
+        const q = plano($("#buscaCat").value);
+        const vistas = q
+          ? todas.filter((c) =>
+              plano(c.categoria + " " + c.subcategoria).includes(q),
+            )
+          : todas;
 
-async function pintarListaCat() {
-  const todas = await api('/api/categorias?todas=1');
-  const q = plano($('#buscaCat').value);
-  const vistas = q
-    ? todas.filter((c) => plano(c.categoria + ' ' + c.subcategoria).includes(q))
-    : todas;
-
-  $('#tablaCat').innerHTML = `
+        $("#tablaCat").innerHTML = `
     <thead><tr>
       <th>Categoría</th><th>Subcategoría</th><th>Tipo</th>
       <th class="num">Usos</th><th style="width:150px"></th>
     </tr></thead>
-    <tbody>${vistas.map((c) => `
-      <tr class="${c.activa ? '' : 'off'}">
+    <tbody>${vistas
+      .map(
+        (c) => `
+      <tr class="${c.activa ? "" : "off"}">
         <td class="etiqueta">${escapar(c.categoria)}</td>
-        <td>${escapar(c.subcategoria)}${c.activa ? '' : ' (desactivada)'}</td>
+        <td>${escapar(c.subcategoria)}${c.activa ? "" : " (desactivada)"}</td>
         <td class="etiqueta">${c.tipo}</td>
         <td class="num cifra">${c.usos}</td>
         <td>
           <button class="suave mini" data-editar="${c.id}">Editar</button>
-          <button class="suave mini" data-baja="${c.id}">${c.activa ? 'Desactivar' : 'Activar'}</button>
-          ${c.usos === 0 && c.reglas === 0
-            ? `<button class="suave mini" data-borrar="${c.id}">Borrar</button>` : ''}
+          <button class="suave mini" data-baja="${c.id}">${c.activa ? "Desactivar" : "Activar"}</button>
+          ${
+            c.usos === 0 && c.reglas === 0
+              ? `<button class="suave mini" data-borrar="${c.id}">Borrar</button>`
+              : ""
+          }
         </td>
-      </tr>`).join('')}</tbody>`;
+      </tr>`,
+      )
+      .join("")}</tbody>`;
 
-  $('#tablaCat').querySelectorAll('[data-editar]').forEach((b) => {
-    b.onclick = () => editarCategoria(todas.find((c) => c.id === +b.dataset.editar));
-  });
-  $('#tablaCat').querySelectorAll('[data-baja]').forEach((b) => {
-    b.onclick = async () => {
-      const c = todas.find((x) => x.id === +b.dataset.baja);
-      try {
-        await api('/api/categorias/' + c.id, {
-          method: 'PATCH', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ activa: c.activa ? 0 : 1 }) });
-        categorias = await api('/api/categorias');
+        $("#tablaCat")
+          .querySelectorAll("[data-editar]")
+          .forEach((b) => {
+            b.onclick = () =>
+              editarCategoria(todas.find((c) => c.id === +b.dataset.editar));
+          });
+        $("#tablaCat")
+          .querySelectorAll("[data-baja]")
+          .forEach((b) => {
+            b.onclick = async () => {
+              const c = todas.find((x) => x.id === +b.dataset.baja);
+              try {
+                await api("/api/categorias/" + c.id, {
+                  method: "PATCH",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ activa: c.activa ? 0 : 1 }),
+                });
+                categorias = await api("/api/categorias");
+                await pintarListaCat();
+                avisar(
+                  c.activa
+                    ? `«${c.subcategoria}» desactivada.`
+                    : `«${c.subcategoria}» activada.`,
+                );
+              } catch (e) {
+                avisar(e.message, true);
+              }
+            };
+          });
+        $("#tablaCat")
+          .querySelectorAll("[data-borrar]")
+          .forEach((b) => {
+            b.onclick = async () => {
+              if (
+                !confirm(
+                  "¿Borrar esta categoría? No tiene movimientos ni reglas.",
+                )
+              )
+                return;
+              try {
+                await api("/api/categorias/" + b.dataset.borrar, {
+                  method: "DELETE",
+                });
+                categorias = await api("/api/categorias");
+                await pintarListaCat();
+              } catch (e) {
+                avisar(e.message, true);
+              }
+            };
+          });
+      }
+
+      $("#btnCategorias").onclick = async () => {
+        $("#buscaCat").value = "";
         await pintarListaCat();
-        avisar(c.activa ? `«${c.subcategoria}» desactivada.` : `«${c.subcategoria}» activada.`);
-      } catch (e) { avisar(e.message, true); }
-    };
-  });
-  $('#tablaCat').querySelectorAll('[data-borrar]').forEach((b) => {
-    b.onclick = async () => {
-      if (!confirm('¿Borrar esta categoría? No tiene movimientos ni reglas.')) return;
-      try {
-        await api('/api/categorias/' + b.dataset.borrar, { method: 'DELETE' });
-        categorias = await api('/api/categorias');
-        await pintarListaCat();
-      } catch (e) { avisar(e.message, true); }
-    };
-  });
-}
+        $("#dlgLista").showModal();
+      };
+      $("#btnNuevaCat").onclick = () => nuevaCategoria("", null);
+      $("#btnCerrarLista").onclick = () => $("#dlgLista").close();
+      let catTimer;
+      $("#buscaCat").oninput = () => {
+        clearTimeout(catTimer);
+        catTimer = setTimeout(pintarListaCat, 200);
+      };
 
-$('#btnCategorias').onclick = async () => {
-  $('#buscaCat').value = '';
-  await pintarListaCat();
-  $('#dlgLista').showModal();
-};
-$('#btnNuevaCat').onclick = () => nuevaCategoria('', null);
-$('#btnCerrarLista').onclick = () => $('#dlgLista').close();
-let catTimer;
-$('#buscaCat').oninput = () => { clearTimeout(catTimer); catTimer = setTimeout(pintarListaCat, 200); };
+      // --- subir extracto ---------------------------------------------------------
 
+      $("#btnSubir").onclick = () => {
+        $("#resumenSubida").textContent = "";
+        $("#dlgSubir .avisoDlg").innerHTML = "";
+        $("#dlgSubir").showModal();
+      };
+      $("#btnSubirCancelar").onclick = () => $("#dlgSubir").close();
+      $("#btnSubirElegir").onclick = () => $("#ficheroSubida").click();
 
-// --- subir extracto ---------------------------------------------------------
+      $("#ficheroSubida").onchange = async () => {
+        const f = $("#ficheroSubida").files[0];
+        if (!f) return;
+        $("#resumenSubida").textContent =
+          "Subiendo e importando " + f.name + "…";
 
-$('#btnSubir').onclick = () => {
-  $('#resumenSubida').textContent = '';
-  $('#dlgSubir .avisoDlg').innerHTML = '';
-  $('#dlgSubir').showModal();
-};
-$('#btnSubirCancelar').onclick = () => $('#dlgSubir').close();
-$('#btnSubirElegir').onclick = () => $('#ficheroSubida').click();
+        const datos = new FormData();
+        datos.append("fichero", f);
 
-$('#ficheroSubida').onchange = async () => {
-  const f = $('#ficheroSubida').files[0];
-  if (!f) return;
-  $('#resumenSubida').textContent = 'Subiendo e importando ' + f.name + '…';
+        try {
+          const r = await api("/api/subir", { method: "POST", body: datos });
+          const partes = [
+            `${r.nuevas} movimientos nuevos`,
+            `${r.repetidas} ya estaban`,
+          ];
+          if (r.clasificadasPorRegla !== undefined)
+            partes.push(`${r.clasificadasPorRegla} clasificados por regla`);
+          if (r.saldosCuadran === false)
+            partes.push("⚠️ los saldos no cuadran, revisa el fichero");
+          $("#resumenSubida").innerHTML = partes.join(" · ");
+          avisar(`«${f.name}» importado: ${r.nuevas} movimientos nuevos.`);
+          sel.clear();
+          await cargar();
+        } catch (e) {
+          $("#resumenSubida").innerHTML = "";
+          avisar(e.message, true);
+        }
+        $("#ficheroSubida").value = "";
+      };
 
-  const datos = new FormData();
-  datos.append('fichero', f);
+      // --- arranque -------------------------------------------------------------
 
-  try {
-    const r = await api('/api/subir', { method: 'POST', body: datos });
-    const partes = [`${r.nuevas} movimientos nuevos`, `${r.repetidas} ya estaban`];
-    if (r.clasificadasPorRegla !== undefined) partes.push(`${r.clasificadasPorRegla} clasificados por regla`);
-    if (r.saldosCuadran === false) partes.push('⚠️ los saldos no cuadran, revisa el fichero');
-    $('#resumenSubida').innerHTML = partes.join(' · ');
-    avisar(`«${f.name}» importado: ${r.nuevas} movimientos nuevos.`);
-    sel.clear();
-    await cargar();
-  } catch (e) {
-    $('#resumenSubida').innerHTML = '';
-    avisar(e.message, true);
-  }
-  $('#ficheroSubida').value = '';
-};
+      function medirCabecera() {
+        const h = document.querySelector("header");
+        document.documentElement.style.setProperty(
+          "--altoCabecera",
+          h.offsetHeight + "px",
+        );
+        const th = document.querySelector("thead tr:first-child th");
+        if (th)
+          document.documentElement.style.setProperty(
+            "--altoTh",
+            th.offsetHeight + "px",
+          );
+      }
+      window.addEventListener("resize", medirCabecera);
 
-// --- arranque -------------------------------------------------------------
-
-function medirCabecera() {
-  const h = document.querySelector('header');
-  document.documentElement.style.setProperty('--altoCabecera', h.offsetHeight + 'px');
-  const th = document.querySelector('thead tr:first-child th');
-  if (th) document.documentElement.style.setProperty('--altoTh', th.offsetHeight + 'px');
-}
-window.addEventListener('resize', medirCabecera);
-
-(async () => {
-  try {
-    categorias = await api('/api/categorias');
-    comboLote  = crearCombo('#catLote',  'Escribe para buscar categoría…');
-    comboRegla = crearCombo('#catRegla', 'Escribe para buscar categoría…');
-    await cargar();
-  } catch (e) { avisar('No se pudo conectar con el servidor: ' + e.message, true); }
-})();
-</script>
-</body>
+      (async () => {
+        try {
+          categorias = await api("/api/categorias");
+          comboLote = crearCombo("#catLote", "Escribe para buscar categoría…");
+          comboRegla = crearCombo(
+            "#catRegla",
+            "Escribe para buscar categoría…",
+          );
+          await cargar();
+        } catch (e) {
+          avisar("No se pudo conectar con el servidor: " + e.message, true);
+        }
+      })();
+    </script>
+  </body>
 </html>

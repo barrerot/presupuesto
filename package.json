@@ -1,0 +1,28 @@
+{
+  "name": "presupuesto",
+  "version": "1.0.0",
+  "description": "Presupuesto personal: importa movimientos del banco y de PayPal, los clasifica por reglas y los cuadra contra la previsión.",
+  "main": "bin/servidor.js",
+  "private": true,
+  "scripts": {
+    "start": "node bin/servidor.js",
+    "dev": "node --watch bin/servidor.js",
+    "importar": "node bin/importar.js",
+    "importar:seco": "node bin/importar.js --seco",
+    "reclasificar": "node bin/importar.js --reclasificar",
+    "resumen": "node bin/importar.js --resumen",
+    "db:seed": "mysql -u presupuesto -p presupuesto < db/seed.sql",
+    "db:estado": "mysql -u presupuesto -p presupuesto -e \"SELECT origen, estado, COUNT(*) n, ROUND(SUM(importe),2) suma FROM movimientos GROUP BY origen, estado; SELECT COUNT(*) categorias FROM categorias; SELECT COUNT(*) reglas FROM reglas; SELECT COUNT(*) incoherencias FROM v_incoherencias;\"",
+    "db:backup": "mysqldump -u presupuesto -p --single-transaction presupuesto > backup-$(date +%F-%H%M).sql"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "mysql2": "^3.23.3",
+    "papaparse": "^5.6.0",
+    "xlsx": "^0.18.5"
+  }
+}

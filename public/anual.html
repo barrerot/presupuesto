@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Presupuesto vs real</title>
+<style>
+  :root {
+    --tinta: #16191d; --papel: #f7f6f3; --linea: #dcd8d0; --apagado: #6f6a62;
+    --acento: #1d5c4f; --acento-sua: #e4efeb; --alerta: #9c3a24;
+    --alerta-sua: #f8e8e4; --radio: 3px;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--papel); color: var(--tinta);
+         font: 15px/1.5 ui-sans-serif, system-ui, "Segoe UI", sans-serif; }
+  .cifra { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+           font-variant-numeric: tabular-nums; }
+
+  header { border-bottom: 1px solid var(--linea); background: #fff;
+           position: sticky; top: 0; z-index: 20; }
+  .cabecera { max-width: 1500px; margin: 0 auto; padding: 13px 20px;
+              display: flex; align-items: baseline; gap: 20px; flex-wrap: wrap; }
+  h1 { font-size: 17px; margin: 0; font-weight: 600; }
+  nav a { color: var(--apagado); text-decoration: none; font-size: 14px;
+          padding: 3px 8px; border-radius: var(--radio); }
+  nav a:hover { background: var(--papel); color: var(--tinta); }
+  nav a.aqui { color: var(--acento); font-weight: 600; }
+  .marcadores { display: flex; gap: 22px; margin-left: auto; font-size: 13px; }
+  .marcador b { display: block; font-size: 18px; font-weight: 600; }
+  .marcador span { color: var(--apagado); }
+
+  main { max-width: 1500px; margin: 0 auto; padding: 18px 20px 60px; }
+  .barra { display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+           margin-bottom: 14px; }
+  select, input { font: inherit; padding: 6px 10px; border: 1px solid var(--linea);
+                  border-radius: var(--radio); background: #fff; color: inherit; }
+  button { font: inherit; padding: 6px 13px; border: 1px solid var(--tinta);
+           border-radius: var(--radio); background: #fff; color: var(--tinta);
+           cursor: pointer; }
+  button.on { background: var(--tinta); color: #fff; }
+  .grupo { display: flex; }
+  .grupo button { border-radius: 0; margin-left: -1px; }
+  .grupo button:first-child { border-radius: var(--radio) 0 0 var(--radio); margin: 0; }
+  .grupo button:last-child { border-radius: 0 var(--radio) var(--radio) 0; }
+
+  .marco { background: #fff; border: 1px solid var(--linea);
+           border-radius: var(--radio); overflow: auto; max-height: 78vh; }
+  table { border-collapse: separate; border-spacing: 0; width: 100%; font-size: 13px; }
+
+  th, td { padding: 5px 9px; white-space: nowrap; }
+  thead th { position: sticky; top: 0; z-index: 10; background: #fbfaf8;
+             border-bottom: 1px solid var(--linea); font-size: 10px;
+             text-transform: uppercase; letter-spacing: .06em;
+             color: var(--apagado); font-weight: 600; text-align: right; }
+  thead th.izq { text-align: left; }
+  /* La primera columna se queda fija: sin ella, a mitad de tabla no sabes
+     qué fila estás mirando. */
+  th.fija, td.fija { position: sticky; left: 0; z-index: 5; background: #fff;
+                     border-right: 1px solid var(--linea); text-align: left;
+                     min-width: 210px; max-width: 210px;
+                     overflow: hidden; text-overflow: ellipsis; }
+  thead th.fija { z-index: 15; background: #fbfaf8; }
+
+  tbody td { border-bottom: 1px solid #f4f1ec; text-align: right; }
+  tbody tr:hover td { background: #fbfaf8; }
+  tbody tr:hover td.fija { background: #fbfaf8; }
+
+  tr.grupoCat td { background: #f2efe9; font-weight: 600; font-size: 11px;
+                   text-transform: uppercase; letter-spacing: .07em;
+                   color: var(--apagado); border-bottom: 1px solid var(--linea); }
+  tr.grupoCat td.fija { background: #f2efe9; }
+  tr.total td { font-weight: 600; border-top: 2px solid var(--tinta);
+                background: #fbfaf8; }
+  tr.total td.fija { background: #fbfaf8; }
+
+  .sub { display: block; }
+  .catNom { font-size: 10px; color: var(--apagado); text-transform: uppercase;
+            letter-spacing: .05em; }
+
+  /* El fondo mide la desviación; el color, su signo. Nada de rojo/verde plano:
+     una desviación de 3 € y otra de 900 € no pueden verse igual. */
+  td.desv { position: relative; }
+  td.desv .valor { position: relative; z-index: 2; }
+  td.desv .barra-fondo { position: absolute; inset: 2px; border-radius: 2px;
+                         z-index: 1; opacity: .5; }
+  .mal .barra-fondo { background: var(--alerta-sua); }
+  .bien .barra-fondo { background: var(--acento-sua); }
+  .mal .valor { color: var(--alerta); }
+  .bien .valor { color: var(--acento); }
+  .cero { color: #c9c4bb; }
+
+  td.editable { cursor: text; }
+  td.editable:hover { outline: 1px solid var(--acento); outline-offset: -1px; }
+  td input.celda { width: 100%; text-align: right; padding: 2px 4px;
+                   border: 1px solid var(--acento); border-radius: 2px;
+                   font: inherit; font-family: ui-monospace, Menlo, monospace; }
+
+  .leyenda { margin-top: 12px; font-size: 12px; color: var(--apagado);
+             display: flex; gap: 18px; flex-wrap: wrap; }
+  .aviso { padding: 10px 14px; margin-bottom: 12px; border-radius: var(--radio);
+           background: var(--acento-sua); border: 1px solid var(--acento); font-size: 14px; }
+  .aviso.mal { background: var(--alerta-sua); border-color: var(--alerta); color: var(--alerta); }
+  .cargando { padding: 60px; text-align: center; color: var(--apagado); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="cabecera">
+    <h1>Presupuesto</h1>
+    <nav>
+      <a href="/">Bandeja</a>
+      <a href="/anual.html" class="aqui">Presupuesto vs real</a>
+    </nav>
+    <div class="marcadores">
+      <div class="marcador"><b class="cifra" id="mIngresos">–</b><span>ingresos</span></div>
+      <div class="marcador"><b class="cifra" id="mGastos">–</b><span>gastos</span></div>
+      <div class="marcador"><b class="cifra" id="mSaldo">–</b><span>diferencia</span></div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div id="aviso"></div>
+
+  <div class="barra">
+    <select id="anio"></select>
+    <div class="grupo" id="vistas">
+      <button data-v="desv" class="on">Desviación</button>
+      <button data-v="real">Real</button>
+      <button data-v="ppto">Presupuesto</button>
+    </div>
+    <label style="font-size:14px;color:var(--apagado)">
+      Desviación anual mínima
+      <select id="umbral">
+        <option value="0">Todas</option>
+        <option value="50">50 €</option>
+        <option value="200">200 €</option>
+        <option value="1000">1.000 €</option>
+        <option value="5000">5.000 €</option>
+      </select>
+    </label>
+    <span id="ocultas" style="font-size:13px;color:var(--apagado)"></span>
+  </div>
+
+  <div class="marco" id="rejilla"><div class="cargando">Cargando…</div></div>
+
+  <div class="leyenda">
+    <span>Doble clic en una celda de <b>Presupuesto</b> para editarla.</span>
+    <span>Los importes se teclean en positivo; el signo lo pone el tipo.</span>
+    <span><b>Enter</b> guarda · <b>Esc</b> cancela · <b>Ctrl+Enter</b> copia al año entero.</span>
+  </div>
+</main>
+
+<script>
+const $ = (s) => document.querySelector(s);
+const MESES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+const eur0 = (n) => Math.abs(n) < 0.005 ? '–'
+  : Number(n).toLocaleString('es-ES', { maximumFractionDigits: 0 });
+const eur2 = (n) => Number(n).toLocaleString('es-ES',
+  { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
+
+let datos = { filas: [], anio: null, anios: [] };
+let vista = 'desv';
+let maxDesv = 1;
+
+async function api(url, op) {
+  const r = await fetch(url, op);
+  const txt = await r.text();
+  let c = null;
+  try { c = JSON.parse(txt); } catch {}
+  if (!r.ok) throw new Error((c && c.error) || `Error ${r.status}`);
+  return c;
+}
+
+function avisar(t, mal) {
+  $('#aviso').innerHTML = t ? `<div class="aviso ${mal ? 'mal' : ''}">${t}</div>` : '';
+  if (t && !mal) setTimeout(() => ($('#aviso').innerHTML = ''), 3500);
+}
+
+/**
+ * Una desviación es "mala" cuando gastas más de lo previsto o ingresas menos.
+ * Con el convenio de signos (ingreso +, gasto −) las dos cosas son lo mismo:
+ * el real queda por debajo del presupuesto. Un gasto de −300 frente a −200
+ * previsto da −100, y un sueldo de 4.900 frente a 5.194 también da negativo.
+ */
+const esMala = (d) => d < 0;
+
+function celdaDesv(fila, m) {
+  const d = fila.real[m] - fila.ppto[m];
+  if (Math.abs(d) < 0.005) return '<td class="cifra cero">–</td>';
+  const mala = esMala(d);
+  const ancho = Math.min(100, (Math.abs(d) / maxDesv) * 100);
+  return `<td class="cifra desv ${mala ? 'mal' : 'bien'}"
+              title="ppto ${eur2(fila.ppto[m])} · real ${eur2(fila.real[m])}">
+    <span class="barra-fondo" style="width:${ancho}%; right:2px; left:auto"></span>
+    <span class="valor">${d > 0 ? '+' : ''}${eur0(d)}</span></td>`;
+}
+
+/** Desviación del año entero de una fila. */
+const desvAnual = (f) =>
+  f.real.reduce((a, b) => a + b, 0) - f.ppto.reduce((a, b) => a + b, 0);
+
+function pintar() {
+  const umbral = Number($('#umbral').value);
+  const filas = umbral
+    ? datos.filas.filter((f) => Math.abs(desvAnual(f)) >= umbral)
+    : datos.filas;
+
+  // Un filtro tiene que decir qué se ha llevado por delante; si no, parece roto.
+  const ocultas = datos.filas.length - filas.length;
+  $('#ocultas').textContent = !umbral ? `${datos.filas.length} subcategorías`
+    : ocultas ? `${filas.length} de ${datos.filas.length} · ${ocultas} por debajo del umbral`
+              : `ninguna baja de ${umbral} €`;
+
+  // Escala común para las barras: si cada fila usara la suya, no se podrían
+  // comparar dos filas entre sí.
+  maxDesv = 1;
+  filas.forEach((f) => f.ppto.forEach((p, i) =>
+    (maxDesv = Math.max(maxDesv, Math.abs(f.real[i] - p)))));
+
+  const campo = vista === 'ppto' ? 'ppto' : 'real';
+  let html = `<table><thead><tr>
+    <th class="fija izq">Subcategoría</th>
+    ${MESES.map((m) => `<th>${m}</th>`).join('')}
+    <th>Año</th></tr></thead><tbody>`;
+
+  // Con umbral puesto ya no interesa el orden alfabético sino el tamaño
+  // del desvío: se busca lo que más se ha salido del plan.
+  const orden = umbral
+    ? [...filas].sort((a, b) => Math.abs(desvAnual(b)) - Math.abs(desvAnual(a)))
+    : filas;
+
+  let catActual = null;
+  const totalMes = Array(12).fill(0);
+
+  for (const f of orden) {
+    if (umbral) {
+      html += `<tr><td class="fija"><span class="sub">${f.subcategoria}</span>
+               <span class="catNom">${f.categoria}</span></td>
+               ${(vista === 'desv' ? f.ppto.map((_, m) => celdaDesv(f, m))
+                  : f[vista === 'ppto' ? 'ppto' : 'real'].map((v, m) =>
+                      `<td class="cifra ${v ? '' : 'cero'} ${vista === 'ppto' ? 'editable' : ''}"
+                        ${vista === 'ppto' ? `data-cat="${f.id}" data-mes="${m + 1}" data-v="${Math.abs(v)}"` : ''}
+                        >${eur0(v)}</td>`)).join('')}
+               <td class="cifra"><b>${eur0(vista === 'desv' ? desvAnual(f)
+                  : f[vista === 'ppto' ? 'ppto' : 'real'].reduce((a, b) => a + b, 0))}</b></td></tr>`;
+      continue;
+    }
+    if (f.categoria !== catActual) {
+      catActual = f.categoria;
+      html += `<tr class="grupoCat"><td class="fija">${f.categoria}</td>
+               <td colspan="13"></td></tr>`;
+    }
+
+    const celdas = [];
+    for (let m = 0; m < 12; m++) {
+      if (vista === 'desv') { celdas.push(celdaDesv(f, m)); continue; }
+      const v = f[campo][m];
+      const editable = vista === 'ppto';
+      celdas.push(`<td class="cifra ${v ? '' : 'cero'} ${editable ? 'editable' : ''}"
+        ${editable ? `data-cat="${f.id}" data-mes="${m + 1}" data-v="${Math.abs(v)}"` : ''}
+        >${eur0(v)}</td>`);
+      if (vista === 'real') totalMes[m] += v;
+    }
+
+    const anual = vista === 'desv'
+      ? f.real.reduce((a, b) => a + b, 0) - f.ppto.reduce((a, b) => a + b, 0)
+      : f[campo].reduce((a, b) => a + b, 0);
+
+    html += `<tr>
+      <td class="fija"><span class="sub">${f.subcategoria}</span></td>
+      ${celdas.join('')}
+      <td class="cifra"><b>${eur0(anual)}</b></td></tr>`;
+  }
+
+  html += '</tbody></table>';
+  $('#rejilla').innerHTML = html;
+  if (vista === 'ppto') conectarEdicion();
+  pintarMarcadores();
+}
+
+function pintarMarcadores() {
+  const suma = (t, campo) => datos.filas
+    .filter((f) => (t === 'ingreso' ? f.tipo === 'ingreso' : f.tipo !== 'ingreso'))
+    .reduce((a, f) => a + f[campo].reduce((x, y) => x + y, 0), 0);
+
+  const campo = vista === 'ppto' ? 'ppto' : 'real';
+  const ing = suma('ingreso', campo);
+  const gas = suma('gasto', campo);
+  $('#mIngresos').textContent = eur2(ing);
+  $('#mGastos').textContent = eur2(gas);
+  $('#mSaldo').textContent = eur2(ing + gas);
+  $('#mSaldo').style.color = ing + gas >= 0 ? 'var(--acento)' : 'var(--alerta)';
+}
+
+/** Edición en la propia celda, sin diálogos: se teclea donde se mira. */
+function conectarEdicion() {
+  document.querySelectorAll('td.editable').forEach((td) => {
+    td.ondblclick = () => {
+      if (td.querySelector('input')) return;
+      const previo = td.textContent;
+      const valor = Number(td.dataset.v) || '';
+      td.innerHTML = `<input class="celda" type="number" step="0.01" value="${valor}">`;
+      const inp = td.querySelector('input');
+      inp.focus(); inp.select();
+
+      const cerrar = () => { td.innerHTML = previo; };
+
+      const guardar = async (alAnio) => {
+        const importe = Number(inp.value || 0);
+        try {
+          await api('/api/presupuesto', {
+            method: 'PUT', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              anio: datos.anio, mes: Number(td.dataset.mes),
+              categoriaId: Number(td.dataset.cat), importe }) });
+
+          if (alAnio) {
+            await api('/api/presupuesto/repetir', {
+              method: 'POST', headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                anio: datos.anio, mes: Number(td.dataset.mes),
+                categoriaId: Number(td.dataset.cat) }) });
+            avisar(`Copiado a los 12 meses.`);
+          }
+          await cargar();
+        } catch (e) { avisar(e.message, true); cerrar(); }
+      };
+
+      inp.onkeydown = (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); guardar(e.ctrlKey || e.metaKey); }
+        else if (e.key === 'Escape') { e.preventDefault(); cerrar(); }
+      };
+      inp.onblur = () => setTimeout(cerrar, 120);
+    };
+  });
+}
+
+async function cargar() {
+  const r = await api('/api/anual?anio=' + (datos.anio || ''));
+  datos = r;
+  if ($('#anio').options.length !== r.anios.length) {
+    $('#anio').innerHTML = r.anios.map((a) =>
+      `<option value="${a}"${a === r.anio ? ' selected' : ''}>${a}</option>`).join('');
+  }
+  pintar();
+}
+
+$('#anio').onchange = () => { datos.anio = Number($('#anio').value); cargar(); };
+$('#umbral').onchange = pintar;
+document.querySelectorAll('#vistas button').forEach((b) => {
+  b.onclick = () => {
+    vista = b.dataset.v;
+    document.querySelectorAll('#vistas button').forEach((x) => x.classList.remove('on'));
+    b.classList.add('on');
+    pintar();
+  };
+});
+
+cargar().catch((e) => avisar('No se pudo cargar: ' + e.message, true));
+</script>
+</body>
+</html>

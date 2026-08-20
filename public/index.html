@@ -1162,11 +1162,17 @@
             estado.min ||
             estado.max ||
             estado.fechaDesde;
-          $("#tabla").innerHTML = `<div class="marco"><div class="vacio">
-      <b>${filtrando ? "Nada coincide" : "Bandeja vacía"}</b>
-      ${filtrando ? "Prueba a quitar algún filtro." : "Todo lo importado tiene categoría."}
-    </div></div>`;
-          if (filtrando) conectarFiltros(foco);
+          // La fila de filtros va SIEMPRE, haya o no resultados: si desaparece
+          // en cuanto una búsqueda deja de encontrar nada, parece que el
+          // buscador "se rompe" justo al escribir la letra que más reduce.
+          $("#tabla").innerHTML = `<div class="marco">
+      <table>${pintarCabecera()}</table>
+      <div class="vacio">
+        <b>${filtrando ? "Nada coincide" : "Bandeja vacía"}</b>
+        ${filtrando ? "Prueba a quitar algún filtro." : "Todo lo importado tiene categoría."}
+      </div>
+    </div>`;
+          conectarFiltros(foco);
           return;
         }
 

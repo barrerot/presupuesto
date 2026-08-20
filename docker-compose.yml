@@ -1,37 +1,43 @@
+# =============================================================================
+#  Presupuesto — MySQL + aplicación
+#
+#  Mismo montaje que Miplan: la app se ata a 127.0.0.1 en el host y quien la
+#  publica es el Caddy del host, que pone el HTTPS y el filtro por IP.
+#  Sin ese "127.0.0.1:" delante, Docker abriría el puerto a internet
+#  saltándose el cortafuegos.
+#
+#  Puerto 3001 porque el 3000 ya lo ocupa Miplan.
+# =============================================================================
+
 services:
 
   db:
     image: mysql:8.4
-    container_name: presupuesto-db
     restart: unless-stopped
     command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASS}
-      MYSQL_DATABASE: ${DB_NAME}
-      MYSQL_USER: ${DB_USER}
-      MYSQL_PASSWORD: ${DB_PASS}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASS:?falta DB_ROOT_PASS en .env}
+      MYSQL_DATABASE: ${DB_NAME:-presupuesto}
+      MYSQL_USER: ${DB_USER:-presupuesto}
+      MYSQL_PASSWORD: ${DB_PASS:?falta DB_PASS en .env}
       TZ: Europe/Madrid
     volumes:
-      - presupuesto_datos:/var/lib/mysql
+      - datos-mysql:/var/lib/mysql
       # Solo se ejecutan la PRIMERA vez, con el volumen vacío. El prefijo
       # numérico importa: MySQL los lanza en orden alfabético y el esquema
       # tiene que ir antes que la semilla.
       - ./db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
       - ./db/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql:ro
       - ./db/presupuesto.sql:/docker-entrypoint-initdb.d/03-presupuesto.sql:ro
-      - ./copias:/copias
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-p${DB_ROOT_PASS}"]
       interval: 10s
       timeout: 5s
-      retries: 12
-      start_period: 40s
-    networks:
-      - interna
+      retries: 10
+      start_period: 30s
 
   app:
     build: .
-    container_name: presupuesto-app
     restart: unless-stopped
     depends_on:
       db:
@@ -39,38 +45,16 @@ services:
     environment:
       DB_HOST: db
       DB_PORT: 3306
-      DB_NAME: ${DB_NAME}
-      DB_USER: ${DB_USER}
+      DB_NAME: ${DB_NAME:-presupuesto}
+      DB_USER: ${DB_USER:-presupuesto}
       DB_PASS: ${DB_PASS}
       HOST: 0.0.0.0
       PUERTO: 3000
       TZ: Europe/Madrid
     volumes:
       - ./uploads:/app/uploads
-    networks:
-      - interna
-      - caddy
-    # SIN `ports:` a propósito. El puerto 3000 no se publica en el host,
-    # así que solo se llega por la red de Caddy. Ni con la VPN puesta se
-    # puede esquivar el proxy yendo directo a la IP del VPS.
-    labels:
-      caddy: ${DOMINIO}
-      # Solo responde a quien viene por WireGuard. Todo lo demás, 403.
-      # Si prefieres no publicar DNS y entrar por IP, quita estas cuatro
-      # etiquetas y deja únicamente el reverse_proxy.
-      caddy.@vpn.remote_ip: ${REDES_VPN}
-      caddy.1_handle: "@vpn"
-      caddy.1_handle.reverse_proxy: "{{upstreams 3000}}"
-      caddy.2_respond: "403"
-      caddy.header.-Server: ""
-      caddy.header.X-Frame-Options: DENY
-      caddy.header.X-Content-Type-Options: nosniff
-      caddy.header.Referrer-Policy: no-referrer
+    ports:
+      - "127.0.0.1:${PUERTO_HOST:-3001}:3000"
 
 volumes:
-  presupuesto_datos:
-
-networks:
-  interna:
-  caddy:
-    external: true
+  datos-mysql:

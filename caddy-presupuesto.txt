@@ -1,0 +1,31 @@
+# Bloque para el Caddyfile del host.
+#
+# El subdominio existe con su certificado, pero solo responde a quien entra
+# por WireGuard. Todo lo demás recibe 404: mejor que un 403, porque un 403
+# confirma que ahí hay algo.
+#
+# La app no tiene autenticación propia: el control de acceso es esto.
+
+cuentas.hestiabuluu.es {
+    @vpn remote_ip 192.168.240.0/24
+
+    handle @vpn {
+        reverse_proxy 127.0.0.1:3001
+    }
+
+    handle {
+        respond "Not Found" 404
+    }
+
+    header {
+        -Server
+        X-Frame-Options DENY
+        X-Content-Type-Options nosniff
+        Referrer-Policy no-referrer
+        Strict-Transport-Security "max-age=31536000"
+    }
+
+    log {
+        output file /var/log/caddy/presupuesto.log
+    }
+}
